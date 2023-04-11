@@ -507,6 +507,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                        ) {
 
 
+//      std::vector<unsigned int> element_flag_is_boundary_element =  DOMAIN_CONTAINING_CTRL_FACES ::array_of_element_control_bndry_target(iproc,msh);
 
 // --- Fractional - BEGIN
 const double C_ns =    compute_C_ns(dim_bdry, s_frac, use_Cns);  
@@ -702,7 +703,7 @@ const double C_ns =    compute_C_ns(dim_bdry, s_frac, use_Cns);
 	// Perform face loop over elements that contain some control face
         
         
-	if ( DOMAIN_CONTAINING_CTRL_FACES :: volume_elem_contains_a_Gamma_control_face(geom_element_jel.get_elem_center_3d()) ) {
+	if ( DOMAIN_CONTAINING_CTRL_FACES :: volume_elem_contains_a_Gamma_control_face(geom_element_jel.get_elem_center_3d())  /*element_flag_is_boundary_element[jel] == 1*/) {
 // --- jel opening - END
 
       
@@ -1003,7 +1004,7 @@ const double C_ns =    compute_C_ns(dim_bdry, s_frac, use_Cns);
 
       
 	// Perform face loop over elements that contain some control face
-	if ( DOMAIN_CONTAINING_CTRL_FACES ::volume_elem_contains_a_Gamma_control_face( geom_element_iel.get_elem_center_3d() ) ) {
+	if ( DOMAIN_CONTAINING_CTRL_FACES ::volume_elem_contains_a_Gamma_control_face( geom_element_iel.get_elem_center_3d() ) /*element_flag_is_boundary_element[iel] == 1*/) {
         
         
 // --- iel opening - END

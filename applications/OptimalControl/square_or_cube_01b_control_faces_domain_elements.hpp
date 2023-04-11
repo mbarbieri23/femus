@@ -99,6 +99,34 @@ static int ControlDomainFlag_internal_restriction(const std::vector<double> & el
 
 
 
+
+
+static std::vector<unsigned int> array_of_element_control_bndry_target(const unsigned iproc,
+                                                                        const Mesh * msh
+                                                                       ) {
+
+   int test_number_of_cell =  msh->_elementOffset[iproc + 1] - msh->_elementOffset[iproc];
+   std::vector<unsigned int> all_element_control_bndry_flag(test_number_of_cell, 0);
+
+    for (int iel = msh->_elementOffset[iproc]; iel < msh->_elementOffset[iproc + 1]; iel++) {
+	  for(unsigned iface = 0; iface < msh->GetElementFaceNumber(iel); iface++) {
+
+        const int bdry_index = msh->el->GetFaceElementIndex(iel, iface);
+        const unsigned int face_index_in_rectangle_domain = - ( msh->el->GetFaceElementIndex(iel, iface) + 1);
+        for(unsigned f = 0; f <  LIST_OF_CTRL_FACES ::_face_with_extremes_index_size; f++) {
+
+            if (face_index_in_rectangle_domain == /*ctrl::*/LIST_OF_CTRL_FACES :: _face_with_extremes_index[f]) {all_element_control_bndry_flag[iel] = 1;}
+
+        }//end face_contol_index loop
+      }//end iface loop
+    }//end iel loop
+    return all_element_control_bndry_flag;
+ }//end function
+
+
+
+
+
  static bool volume_elem_contains_a_Gamma_control_face( const std::vector<double> & elem_center ) {
 
       int control_flag_jel = 0;
@@ -121,9 +149,13 @@ static int ControlDomainFlag_bdry(const std::vector<double> & elem_center) {
 
   const double control_domain_depth = BOUNDARY_ORTHOGONAL_DISTANCE_FROM_GAMMA_C; //this picks a lot more elements, but then the if on the faces only gets the control boundary
 
+  bool is_region_outside_the_flag = false;
 
   for(unsigned f = 0; f < /*ctrl::*/ LIST_OF_CTRL_FACES ::_face_with_extremes_index_size; f++) {
 
+         if(is_region_outside_the_flag) { break; }
+
+        //preparation BEGIN
          const int  line_sign =  /*ctrl::*/ LIST_OF_CTRL_FACES ::sign_function_for_delimiting_region(/*ctrl::*/ LIST_OF_CTRL_FACES ::_face_with_extremes_index[f]);
 
          const double extreme_pos = face_coordinate_extreme_position_normal_to_Gamma_control(/*ctrl::*/ LIST_OF_CTRL_FACES ::_face_with_extremes_index[f]);
@@ -131,25 +163,28 @@ static int ControlDomainFlag_bdry(const std::vector<double> & elem_center) {
          const unsigned int normal_dir =  LIST_OF_CTRL_FACES ::normal_direction_to_Gamma_control(/*ctrl::*/ LIST_OF_CTRL_FACES ::_face_with_extremes_index[f]);
 
         const std::vector<unsigned int> tang_dir = LIST_OF_CTRL_FACES ::tangential_direction_to_Gamma_control( LIST_OF_CTRL_FACES ::_face_with_extremes_index[f], LIST_OF_CTRL_FACES :: _num_of_tang_components_per_face_2d );
+        //preparation END
+
 
         if ( line_sign * elem_center[normal_dir] <   line_sign * (  extreme_pos  + line_sign * control_domain_depth) ) {
             control_el_flag = 1;
+
             for( int t = 0; t < tang_dir.size(); t++){
-
                 if(  !(
-                     (elem_center[tang_dir[t]] >/* ctrl::*/ LIST_OF_CTRL_FACES ::_face_with_extremes_extremes_on_tang_surface[f][t][0] - offset_to_include_line )
+                     (elem_center[tang_dir[t]] >  /* ctrl::*/ LIST_OF_CTRL_FACES ::_face_with_extremes_extremes_on_tang_surface[f][t][0] /*+*/ - offset_to_include_line )
                      &&
-                     (elem_center[tang_dir[t]] < /*ctrl::*/ LIST_OF_CTRL_FACES ::_face_with_extremes_extremes_on_tang_surface[f][t][1] + offset_to_include_line )
-                      )   ){control_el_flag = 0;}
-
+                     (elem_center[tang_dir[t]] <   /*ctrl::*/ LIST_OF_CTRL_FACES ::_face_with_extremes_extremes_on_tang_surface[f][t][1] /*-*/ + offset_to_include_line )
+                      )   ){control_el_flag = 0; is_region_outside_the_flag = true; break; }
             }
+
         }
+
 
  }
 
 
 
-     return control_el_flag /*1*/ ;
+     return /*control_el_flag*/ 1 ;
 }
 
 

@@ -1238,7 +1238,7 @@ namespace  boundary_control_full_face {
 
       const unsigned List_of_Gamma_control_faces_Four::_face_with_extremes_index[ List_of_Gamma_control_faces_Single::_face_with_extremes_index_size ] = {    4    };
 
-//*********************** Double - END *****************************************
+//*********************** Single - END *****************************************
 
 
 
@@ -1248,7 +1248,7 @@ namespace  boundary_control_full_face {
 
 
 
-//*********************** Double - BEGIN *****************************************
+//*********************** Single - BEGIN *****************************************
 
   class List_of_Gamma_control_faces_Single : public square_or_cube::List_of_Gamma_control_faces<2> {
 
@@ -1318,13 +1318,13 @@ namespace  boundary_control_full_face {
       const unsigned List_of_Gamma_control_faces_Four::_face_with_extremes_index[ List_of_Gamma_control_faces_Single::_face_with_extremes_index_size ] = {    4    };
 
 
-//*********************** Double - END *****************************************
+//*********************** Single - END *****************************************
 
 
 
      } 
 
-  }
+  }//end namespace  boundary_control_full_face
   
   
   

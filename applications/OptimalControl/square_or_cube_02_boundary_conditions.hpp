@@ -49,23 +49,17 @@ class Boundary_Condition {
             is_bdry_bdry_region = 1;
 
             for(unsigned t = 0; t < number_of_tangential_direction_components; t++) {
-
-                          if (
-                                  (x[ /*ctrl::*/LIST_OF_CTRL_FACES ::tangential_direction_to_Gamma_control(faceName, number_of_tangential_direction_components)[t] ] >
+                          if (    (x[ /*ctrl::*/LIST_OF_CTRL_FACES ::tangential_direction_to_Gamma_control(faceName, number_of_tangential_direction_components)[t] ] >
                                             /*ctrl::*/LIST_OF_CTRL_FACES ::_face_with_extremes_extremes_on_tang_surface[f][t][0] +  OFFSET_TO_INCLUDE_LINE &&
                                    x[ /*ctrl::*/LIST_OF_CTRL_FACES ::tangential_direction_to_Gamma_control(faceName, number_of_tangential_direction_components)[t] ] <
                                             /*ctrl::*/LIST_OF_CTRL_FACES ::_face_with_extremes_extremes_on_tang_surface[f][t][1] -  OFFSET_TO_INCLUDE_LINE
-                                  )
-                             ) { is_bdry_bdry_region *= 1; }
+                                  ) ) { is_bdry_bdry_region *= 1; }
+                          else { is_bdry_bdry_region *= 0; break; }
+            }//edn t: tangential component loop
 
-                          else { is_bdry_bdry_region *= 0; }
+        }//end if (is a face of cntrl bdry)
 
-            }
-
-            break;
-        }
-
-    }
+    }//end f (face index) loop
 
     return std::pair< bool, unsigned int >/*std::make_pair*/( is_facename_a_control_face, (is_bdry_bdry_region == 1) );
 

@@ -81,10 +81,10 @@ public:
                         //-----------
                         const bool print_algebra_local
                        ) {
-      
-   
+
+//    std::vector<unsigned int> element_flag_is_boundary_element =  DOMAIN_CONTAINING_CTRL_FACES ::array_of_element_control_bndry_target(iproc,msh);
+
    const unsigned  elem_dof_size_max = n_components_ctrl * max_size;
-   
    std::vector < double >  Res_ctrl_only;      Res_ctrl_only.reserve( elem_dof_size_max );                         //should have Mat order
    std::vector < double >  Jac_ctrl_only;      Jac_ctrl_only.reserve( elem_dof_size_max * elem_dof_size_max);   //should have Mat order
 
@@ -94,9 +94,8 @@ public:
   double integral_beta   = 0.;
 // integral - END ************
 
- 
+
     for (int iel = msh->_elementOffset[iproc]; iel < msh->_elementOffset[iproc + 1]; iel++) {
-        
 // --- geometry        
             geom_element_iel.set_coords_at_dofs_and_geom_type(iel, solType_coords);
 
