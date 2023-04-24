@@ -133,6 +133,8 @@ namespace ctrl {
 
   #define UNBOUNDED   1
 
+  #define ANALITICAL_SOLUTION   0
+
   #define USE_Cns     1
 
 #elif NORM_GIR_RAV == 1 

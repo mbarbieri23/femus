@@ -40,6 +40,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
 //                       int & count,
 //
                       const unsigned unbounded,
+                      const unsigned int analitical_solution,
                       const unsigned dim,
                       const unsigned dim_bdry,
 //////////
@@ -294,6 +295,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               //  what are the global axes that are consistent with outgoing normal - END -----
 
 
+              if( analitical_solution == 1){
               //======================== ANALITICAL SOLUTION - BEGIN ========================
 
               //****************** node at boundary of the boundary - BEGIN ******************
@@ -355,115 +357,123 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               // integral - END -----
 
               //======================== ANALITICAL SOLUTION - END ========================
-
+              } //end if ANALITICAL_SOLUTION
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
-
+              else{
               //======================== NUMERICAL SOLUTION - BEGIN ========================
 
 
               //****************** delta coords coarse resize - BEGIN ******************
 
                  //------------ delta coords coarse resize 3 X 3 - BEGIN ------------
-//               vector  < vector  <  double> > radius_centered_at_x_qp_of_iface_bdry_bdry(dim);    // A matrix holding the face coordinates rowwise.
-//               for(int k = 0; k < dim; k++) {
-//                 radius_centered_at_x_qp_of_iface_bdry_bdry[k].resize(jel_n_dofs_bdry_bdry);
-//               }
-//               //------------ delta coords coarse resize 3 X 3 - END ------------
-//
-//               //------------ delta coords coarse computation - BEGIN ------------
-//               for(unsigned jdof_bdry_bdry = 0; jdof_bdry_bdry < jel_n_dofs_bdry_bdry; jdof_bdry_bdry++) {
-//
-//                 // jnode mapping to element and to volume node - BEGIN
-//                 unsigned jnode_bdry_bdry     = msh->el->GetIG(jel_geom_type_face, e_bdry_bdry, jdof_bdry_bdry); // face-to-element local node mapping.
-//                 unsigned jnode_bdry_bdry_vol = msh->el->GetIG(jel_geom_type, jface, jnode_bdry_bdry);
-//                 // jnode mapping to element and to volume node - END
-//
-//                 for(unsigned k = 0; k < dim; k++) {
-//                   radius_centered_at_x_qp_of_iface_bdry_bdry[k][jdof_bdry_bdry] = geom_element_jel.get_coords_at_dofs_3d()[k][jnode_bdry_bdry_vol] - x_qp_of_iface[k];
-//                 }
-//               }
+              vector  < vector  <  double> > radius_centered_at_x_qp_of_iface_bdry_bdry(dim);    // A matrix holding the face coordinates rowwise.
+              for(int k = 0; k < dim; k++) {
+                radius_centered_at_x_qp_of_iface_bdry_bdry[k].resize(jel_n_dofs_bdry_bdry);
+              }
+              //------------ delta coords coarse resize 3 X 3 - END ------------
+
+              //------------ delta coords coarse computation - BEGIN ------------
+              for(unsigned jdof_bdry_bdry = 0; jdof_bdry_bdry < jel_n_dofs_bdry_bdry; jdof_bdry_bdry++) {
+
+                // jnode mapping to element and to volume node - BEGIN
+                unsigned jnode_bdry_bdry     = msh->el->GetIG(jel_geom_type_face, e_bdry_bdry, jdof_bdry_bdry); // face-to-element local node mapping.
+                unsigned jnode_bdry_bdry_vol = msh->el->GetIG(jel_geom_type, jface, jnode_bdry_bdry);
+                // jnode mapping to element and to volume node - END
+
+                for(unsigned k = 0; k < dim; k++) {
+                  radius_centered_at_x_qp_of_iface_bdry_bdry[k][jdof_bdry_bdry] = geom_element_jel.get_coords_at_dofs_3d()[k][jnode_bdry_bdry_vol] - x_qp_of_iface[k];
+                }
+              }
                  //------------ delta coords coarse computation - END ------------
 
               //****************** delta coords coarse resize - END ******************
 
 
               // delta coords - refinement - BEGIN -----
-//               vector  < vector  <  double > > radius_centered_at_x_qp_of_iface_bdry_bdry_refined(dim);
-//               for(int k = 0; k < dim; k++) {
-//                 radius_centered_at_x_qp_of_iface_bdry_bdry_refined[k].resize(n_divisions_face_of_face + 1);
-//               }
-//
-//                 constexpr unsigned point_along_face_of_face_first = 0;
-//                 constexpr unsigned point_along_face_of_face_last  = 1;
-//
-//
-//               for(unsigned n = 0; n <= n_divisions_face_of_face; n++) {
-//                 for(int k = 0; k < dim; k++) {
-//                   const double increment_in_current_dim =
-//                   (radius_centered_at_x_qp_of_iface_bdry_bdry[k][ point_along_face_of_face_last ] -
-//                    radius_centered_at_x_qp_of_iface_bdry_bdry[k][ point_along_face_of_face_first]) /  n_divisions_face_of_face;
-//                   radius_centered_at_x_qp_of_iface_bdry_bdry_refined[k][n] = radius_centered_at_x_qp_of_iface_bdry_bdry[k][0] + n * increment_in_current_dim ;
-//                 }
-//               }
+              vector  < vector  <  double > > radius_centered_at_x_qp_of_iface_bdry_bdry_refined(dim);
+              for(int k = 0; k < dim; k++) {
+                radius_centered_at_x_qp_of_iface_bdry_bdry_refined[k].resize(n_divisions_face_of_face + 1);
+              }
+
+                constexpr unsigned point_along_face_of_face_first = 0;
+                constexpr unsigned point_along_face_of_face_last  = 1;
+
+
+              for(unsigned n = 0; n <= n_divisions_face_of_face; n++) {
+                for(int k = 0; k < dim; k++) {
+                  const double increment_in_current_dim =
+                  (radius_centered_at_x_qp_of_iface_bdry_bdry[k][ point_along_face_of_face_last ] -
+                   radius_centered_at_x_qp_of_iface_bdry_bdry[k][ point_along_face_of_face_first]) /  n_divisions_face_of_face;
+                  radius_centered_at_x_qp_of_iface_bdry_bdry_refined[k][n] = radius_centered_at_x_qp_of_iface_bdry_bdry[k][0] + n * increment_in_current_dim ;
+                }
+              }
               // delta coords - refinement - END -----
 
 
-//               // compute unbounded integral - BEGIN -----
-//               for(unsigned n = 0; n < n_divisions_face_of_face; n++) {
-//
-//
-//               //--------- theta declaration - BEGIN ---------
-//               std::vector< double > theta_first_and_last_radius(2);
-//               constexpr unsigned theta_of_radius_first = 0;
-//               constexpr unsigned theta_of_radius_second = 1;
-//               //--------- theta declaration - END ---------
-//
+              // compute unbounded integral - BEGIN -----
+              for(unsigned n = 0; n < n_divisions_face_of_face; n++) {
+
+
+              //--------- theta declaration - BEGIN ---------
+              std::vector< double > theta_first_and_last_radius(2);
+              constexpr unsigned theta_of_radius_first = 0;
+              constexpr unsigned theta_of_radius_second = 1;
+              //--------- theta declaration - END ---------
+
                 //************ theta's - BEGIN ************
 
 
-// ///@todooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-//
-//
-//               // theta's calculus - BEGIN -----
-//                 for(unsigned p = 0; p < theta_first_and_last_radius.size(); p++) {
-//                    theta_first_and_last_radius[p] = atan2(radius_centered_at_x_qp_of_iface_bdry_bdry_refined[ global_dirs_for_atan[global_dir_second] ][n + p],
-//                                                           radius_centered_at_x_qp_of_iface_bdry_bdry_refined[ global_dirs_for_atan[global_dir_first] ][n + p]);
-//                               }
-//
-// // // //                 double delta_theta = 0.;
-// // // //                 if(theta_first_and_last_radius[1] < theta_first_and_last_radius[0]) delta_theta = std::min(theta_first_and_last_radius[0] - theta_first_and_last_radius[1], 2. * M_PI + theta_first_and_last_radius[1] - theta_first_and_last_radius[0]);
-// // // //                 else delta_theta = std::min(theta_first_and_last_radius[1] - theta_first_and_last_radius[0], 2. * M_PI + theta_first_and_last_radius[0] - theta_first_and_last_radius[1]);
-//                 if(theta_first_and_last_radius[ theta_of_radius_second ] < theta_first_and_last_radius[ theta_of_radius_first ]) {
-//                     theta_first_and_last_radius[theta_of_radius_second ] += 2. * M_PI;
-//                 }
-//
-//                 double delta_theta = theta_first_and_last_radius[ theta_of_radius_second ] -
-//                                      theta_first_and_last_radius[ theta_of_radius_first ];
-//               // theta's calculus - END -----
-                //************ theta's - END ************
+///@todooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-//                // distance |x - y| at midpoint - BEGIN -----
-//                vector <double> mid_point(dim, 0.);
-//                 for(unsigned k = 0; k < dim; k++) {
-//                   mid_point[k] = (radius_centered_at_x_qp_of_iface_bdry_bdry_refined[k][n + 1] + radius_centered_at_x_qp_of_iface_bdry_bdry_refined[k][n]) * 0.5;
-//                 }
-//                 double dist2 = 0;
-//                 for(int k = 0; k < dim; k++) {
-//                   dist2 += mid_point[k] * mid_point[k];
-//                 }
-//                 double dist = sqrt(dist2);
-//                // distance |x - y| at midpoint - END -----
-//
-//                 // integral - BEGIN -----
-//                 /*numerical solution*/
-// //                 mixed_denominator_numerical += pow(dist, -  2. * s_frac)  * delta_theta;
-//                // integral - END -----
-//
-//               }
+
+              // theta's calculus - BEGIN -----
+                for(unsigned p = 0; p < theta_first_and_last_radius.size(); p++) {
+                   theta_first_and_last_radius[p] = atan2(radius_centered_at_x_qp_of_iface_bdry_bdry_refined[ global_dirs_for_atan[global_dir_second] ][n + p],
+                                                          radius_centered_at_x_qp_of_iface_bdry_bdry_refined[ global_dirs_for_atan[global_dir_first] ][n + p]);
+                              }
+
+// // //                 double delta_theta = 0.;
+// // //                 if(theta_first_and_last_radius[1] < theta_first_and_last_radius[0]) delta_theta = std::min(theta_first_and_last_radius[0] - theta_first_and_last_radius[1], 2. * M_PI + theta_first_and_last_radius[1] - theta_first_and_last_radius[0]);
+// // //                 else delta_theta = std::min(theta_first_and_last_radius[1] - theta_first_and_last_radius[0], 2. * M_PI + theta_first_and_last_radius[0] - theta_first_and_last_radius[1]);
+                if(theta_first_and_last_radius[ theta_of_radius_second ] < theta_first_and_last_radius[ theta_of_radius_first ]) {
+                    theta_first_and_last_radius[theta_of_radius_second ] += 2. * M_PI;
+                }
+
+                double delta_theta = theta_first_and_last_radius[ theta_of_radius_second ] -
+                                     theta_first_and_last_radius[ theta_of_radius_first ];
+              // theta's calculus - END -----
+              // ************ theta's - END ************
+
+               // distance |x - y| at midpoint - BEGIN -----
+               vector <double> mid_point(dim, 0.);
+                for(unsigned k = 0; k < dim; k++) {
+                  mid_point[k] = (radius_centered_at_x_qp_of_iface_bdry_bdry_refined[k][n + 1] + radius_centered_at_x_qp_of_iface_bdry_bdry_refined[k][n]) * 0.5;
+                }
+                double dist2 = 0;
+                for(int k = 0; k < dim; k++) {
+                  dist2 += mid_point[k] * mid_point[k];
+                }
+                double dist = sqrt(dist2);
+               // distance |x - y| at midpoint - END -----
+
+                // integral - BEGIN -----
+                /*numerical solution*/
+                mixed_denominator_numerical += pow(dist, -  2. * s_frac)  * delta_theta;
+               // integral - END -----
+
+              }
               // compute unbounded integral - END -----
+
+
               //======================== NUMERICAL SOLUTION - END ========================
-          
+              } //end if ANALITICAL_SOLUTION
+
+
+
+
+
+
               } // end if(is_face_bdry_bdry)
               
             }  //end face of face loop
@@ -648,6 +658,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                         const unsigned int operator_L2,
                         const double rhs_one,
                         const unsigned int unbounded,
+                        const unsigned int analitical_solution,
                         const std::string node_based_bdry_bdry_in,
                         //--- Quadrature --------
                         const unsigned qrule_i,
@@ -1499,6 +1510,7 @@ unsigned nDof_iel_vec = 0;
 //                               count_unbounded,
 //
                               unbounded,
+                              analitical_solution,
                               dim,
                               dim_bdry,
 //////////
@@ -1689,7 +1701,8 @@ unsigned nDof_iel_vec = 0;
                   //
 //                   count_unbounded,
                   //
-                  unbounded,
+                              unbounded,
+                              analitical_solution,
                               dim,
                               dim_bdry,
 //////////                             
