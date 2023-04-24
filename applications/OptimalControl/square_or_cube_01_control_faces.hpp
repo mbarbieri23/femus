@@ -63,17 +63,27 @@ static constexpr double domain_length = 1.;
              if (face_index == 1 || face_index == 2) { axis_dir[ 0 ] = 1; }
         else if (face_index == 3 || face_index == 4) { axis_dir[ 0 ] = 0; }
 
-
         }
         else{
 
-            if (face_index == 1 || face_index == 2) { axis_dir[ 0 ] = 1; axis_dir[ 1 ]  = 2; }
-       else if (face_index == 3 || face_index == 4) { axis_dir[ 0 ] = 2; axis_dir[ 1 ]  = 0; }
-       else if (face_index == 5 || face_index == 6) { axis_dir[ 0 ] = 0; axis_dir[ 1 ]  = 1; }  ///@todo this depends on the mesh file
+              switch(face_index) {
 
+             case(1): { axis_dir[ 0 ] = 2; axis_dir[ 1 ]  = 1; return axis_dir; }
+             case(2): { axis_dir[ 0 ] = 1; axis_dir[ 1 ]  = 2; return axis_dir; }
+
+             case(3): { axis_dir[ 0 ] = 0; axis_dir[ 1 ]  = 2; return axis_dir; }
+             case(4): { axis_dir[ 0 ] = 2; axis_dir[ 1 ]  = 0; return axis_dir; }
+
+             case(5): { axis_dir[ 0 ] = 1; axis_dir[ 1 ]  = 0; return axis_dir; }
+             case(6): { axis_dir[ 0 ] = 0; axis_dir[ 1 ]  = 1; return axis_dir; }
+
+             }
+
+//             if (face_index == 1 || face_index == 2) { axis_dir[ 0 ] = 1; axis_dir[ 1 ]  = 2; }
+//        else if (face_index == 3 || face_index == 4) { axis_dir[ 0 ] = 2; axis_dir[ 1 ]  = 0; }
+//        else if (face_index == 5 || face_index == 6) { axis_dir[ 0 ] = 0; axis_dir[ 1 ]  = 1; }  ///@todo this depends on the mesh file
+//
         }
-
-
 
     return axis_dir;
 

@@ -285,14 +285,17 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
 
 
                // what are the global axes that are consistent with outgoing normal - BEGIN -----
-                std::vector< unsigned > global_dirs_for_atan(dim_bdry);
-                constexpr unsigned global_dir_first = 0;
-                constexpr unsigned global_dir_second = 1;
-                global_dirs_for_atan[global_dir_first ] = ( ( ( j_element_face_index /*LIST_OF_CTRL_FACES :: _face_with_extremes_index[0] *//*FACE_FOR_CONTROL*/ - 1) / 2 ) + 1 ) % 3;
-                global_dirs_for_atan[global_dir_second] = ( global_dirs_for_atan[0] + 1 ) % 3 ;
 
-                if ( (j_element_face_index /*LIST_OF_CTRL_FACES :: _face_with_extremes_index[0] */% 2) == 1 ) {  std::reverse(global_dirs_for_atan.begin(), global_dirs_for_atan.end()); }
-              //  what are the global axes that are consistent with outgoing normal - END -----
+                  std::vector< unsigned > global_dirs_for_atan(dim_bdry);
+                  constexpr unsigned global_dir_first = 0;
+                  constexpr unsigned global_dir_second = 1;
+                  global_dirs_for_atan = LIST_OF_CTRL_FACES ::tangential_direction_to_Gamma_control(i_element_face_index, dim_bdry);
+
+//                 global_dirs_for_atan[global_dir_first ] = ( ( ( j_element_face_index /*LIST_OF_CTRL_FACES :: _face_with_extremes_index[0] *//*FACE_FOR_CONTROL*/ - 1) / 2 ) + 1 ) % 3;
+//                 global_dirs_for_atan[global_dir_second] = ( global_dirs_for_atan[0] + 1 ) % 3 ;
+//                 if ( (j_element_face_index /*LIST_OF_CTRL_FACES :: _face_with_extremes_index[0] */% 2) == 1 ) {  std::reverse(global_dirs_for_atan.begin(), global_dirs_for_atan.end()); }
+
+               //  what are the global axes that are consistent with outgoing normal - END -----
 
 
               if( analitical_solution == 1){
