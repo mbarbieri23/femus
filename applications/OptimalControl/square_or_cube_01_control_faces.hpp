@@ -90,6 +90,21 @@ static constexpr double domain_length = 1.;
 }
 //-------------- my change - END
 
+static bool is_face_on_maximal_coordinate_by_tangential_component(std::vector<  unsigned int > axis_dir){
+
+
+        if ( ( axis_dir[ 0 ] == 1 && axis_dir[ 1 ]  == 2 ) ||
+             ( axis_dir[ 0 ] == 2 && axis_dir[ 1 ]  == 0 ) ||
+             ( axis_dir[ 0 ] == 0 && axis_dir[ 1 ]  == 1 )    ) {return true;}
+
+      else { return false; }
+
+
+}
+
+
+
+
       static const unsigned int tangential_direction_to_Gamma_control(const unsigned int face_index) {
 
     unsigned int axis_dir;
@@ -124,7 +139,81 @@ static constexpr double domain_length = 1.;
 
       }
       
-      
+
+// static std::vector< double>  exteeme_value_along_some_direction (){}
+
+
+
+//-------------- create_matrix_of_cords_of_bndry_bndry_points_from_face_index- BEGIN --------------
+
+     static std::vector< std::vector< double > > create_matrix_of_cords_of_bndry_bndry_points_from_face_index(const unsigned int face_index,
+                                                                                                              const unsigned boundary_dim,
+                                                                                                              const unsigned numbers_of_nodes,
+                                                                                                              const double first_direction_value_one,
+                                                                                                              const double first_direction_value_two,
+                                                                                                              const double second_direction_value_one,
+                                                                                                              const double second_direction_value_two){
+
+
+
+         // vectors of extreeme along tangential direction - BEGIN
+         std::vector< double > exteeme_value_along_first_tangential_direction( boundary_dim);
+         exteeme_value_along_first_tangential_direction[0]  = first_direction_value_one;
+         exteeme_value_along_first_tangential_direction[1]  = first_direction_value_two;
+
+         std::vector< double > exteeme_value_along_second_tangential_direction( boundary_dim);
+         exteeme_value_along_second_tangential_direction[0] = second_direction_value_one;
+         exteeme_value_along_second_tangential_direction[1] = second_direction_value_two;
+         // vectors of extreeme along tangential direction - END
+
+         std::vector< unsigned int > tangetntial_vector = tangential_direction_to_Gamma_control( face_index, boundary_dim );
+         bool is_face_on_maximal_coordinate = is_face_on_maximal_coordinate_by_tangential_component( tangetntial_vector );
+         unsigned first_tangential_direction = tangetntial_vector[0];
+         unsigned second_tangential_direction = tangetntial_vector[1];
+
+         //********************* Matrix of nodes of the bndry bndry - BEGIN *********************
+
+         //creation of the matrix - BEGIN
+         std::vector< std::vector< double > > bndry_bdnry_matrix_of_cords(boundary_dim + 1);
+         for(unsigned f = 0; f <  bndry_bdnry_matrix_of_cords.size(); f++) {
+             bndry_bdnry_matrix_of_cords[f].resize(numbers_of_nodes);
+         }
+         //creation of the matrix - END
+
+         // filling the matrix of bndry bndry cords along normal direction - BEGIN
+         unsigned int normal_dir = normal_direction_to_Gamma_control( face_index );
+         for (int p = 0; p < bndry_bdnry_matrix_of_cords[ normal_dir ].size(); p++){
+             bndry_bdnry_matrix_of_cords[ normal_dir ][ p ] = normal_coordinate(is_face_on_maximal_coordinate);
+         }
+         // filling the matrix of bndry bndry cords along normal direction - END
+
+         // filling the matrix of bndry bndry cords along tangential direction - BEGIN
+         for (int t = 0; t < bndry_bdnry_matrix_of_cords[ normal_dir ].size(); t++){
+             bndry_bdnry_matrix_of_cords[ first_tangential_direction ][ t ]  = exteeme_value_along_first_tangential_direction[ ( ( ( 3 - t )*( t % 3 ) ) / 2 )];
+             bndry_bdnry_matrix_of_cords[ second_tangential_direction ][ t ] = exteeme_value_along_second_tangential_direction[ ( t / 2 )];
+         }
+         // filling the matrix of bndry bndry cords along tangential direction - END
+
+         //********************* Matrix of nodes of the bndry bndry - END *********************
+
+//          bndry_bdnry_matrix_of_cords[first_tangential_direction][0]  = first_direction_value_one;
+//          bndry_bdnry_matrix_of_cords[second_tangential_direction][0] = second_direction_value_one;
+//
+//          bndry_bdnry_matrix_of_cords[first_tangential_direction][1]  = first_direction_value_two;
+//          bndry_bdnry_matrix_of_cords[second_tangential_direction][1] = second_direction_value_one;
+//
+//          bndry_bdnry_matrix_of_cords[first_tangential_direction][2]  = first_direction_value_two;
+//          bndry_bdnry_matrix_of_cords[second_tangential_direction][2] = second_direction_value_two;
+//
+//          bndry_bdnry_matrix_of_cords[first_tangential_direction][3]  = first_direction_value_one;
+//          bndry_bdnry_matrix_of_cords[second_tangential_direction][3] = second_direction_value_two;
+
+         return bndry_bdnry_matrix_of_cords;
+
+    }
+
+//-------------- create_matrix_of_cords_of_bndry_bndry_points_from_face_index- END --------------
+
  };
  
 // Here, the assumption is that each face of the Domain contains at most 1 interval of Control (hence, two extremes)

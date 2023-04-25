@@ -210,8 +210,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
       
     //============ Mixed Integral 2D - Numerical ==================      
       else if (dim_bdry == 2) {           
-          
-          
+
   // ctrl face to node-node association
  std::map<unsigned int, unsigned int >  ctrl_faces_VS_their_nodes = LIST_OF_CTRL_FACES :: from_ctrl_faces_to_their_boundaries();
  
@@ -249,10 +248,24 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
 
          double mixed_denominator_numerical = 0.;
          
+          //create matrix of coordinate of bndry bndry nodes - BEGIN
+
+         unsigned number_of_nodes = jel_n_faces_faces;
+
+            std::vector< std::vector< double > > face_index_bndry_region_vertex_cords =
+            LIST_OF_CTRL_FACES ::create_matrix_of_cords_of_bndry_bndry_points_from_face_index(j_element_face_index,
+                                                                        dim_bdry,
+                                                                        number_of_nodes,
+                                                                        0.25,
+                                                                        0.75,
+                                                                        0.25,
+                                                                        0.75);
+
+          //create matrix of coordinate of bndry bndry nodes - END
+
 
          for(unsigned e_bdry_bdry = 0; e_bdry_bdry < jel_n_faces_faces; e_bdry_bdry++) {  //loop over face of face
 
-              // look for boundary faces - BEGIN
               
               unsigned jel_n_dofs_bdry_bdry =  msh->el->GetNFACENODES(jel_geom_type_face, e_bdry_bdry, solType_coords); //number of nodes on face of face
 
@@ -273,9 +286,6 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               }
               //nodes_face_face_flags  - END
 
-
-              
-              
                 bool is_face_bdry_bdry  =  MED_IO::boundary_of_boundary_3d_check_face_of_face_via_nodes( nodes_face_face_flags, t_med_flag_of_node_bdry_bdry_for_control_face);
               // look for boundary of boundary faces - END
                 
@@ -298,14 +308,14 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                //  what are the global axes that are consistent with outgoing normal - END -----
 
 
-              if( analitical_solution == 1){
               //======================== ANALITICAL SOLUTION - BEGIN ========================
+              if( analitical_solution == 1){
 
               //****************** node at boundary of the boundary - BEGIN ******************
               //------------ node at boundary of the boundary 3 X 3 - BEGIN ------------
-              vector  < vector  <  double> > nodes_of_bndry_bndry(dim);    // A matrix holding the face coordinates rowwise.
+              vector  < vector  <  double> > nodes_on_line_of_bndry_bndry(dim);    // A matrix holding the face coordinates rowwise.
               for(int k = 0; k < dim; k++) {
-                nodes_of_bndry_bndry[k].resize(jel_n_dofs_bdry_bdry);
+                nodes_on_line_of_bndry_bndry[k].resize(jel_n_dofs_bdry_bdry);
               }
               //------------ node at boundary of the boundary 3 X 3 - END ------------
 
@@ -316,7 +326,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                    unsigned jnode_bdry_bdry_vol = msh->el->GetIG(jel_geom_type, jface, jnode_bdry_bdry);
 
                    for(unsigned k = 0; k < dim; k++) {
-                   nodes_of_bndry_bndry[k][jdof_bdry_bdry] = geom_element_jel.get_coords_at_dofs_3d()[k][jnode_bdry_bdry_vol];
+                   nodes_on_line_of_bndry_bndry[k][jdof_bdry_bdry] = geom_element_jel.get_coords_at_dofs_3d()[k][jnode_bdry_bdry_vol];
                    }
 
                }
@@ -327,7 +337,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               //preparation coefficent for analitical solution - BEGIN
               double a, b, c, d, sp;
               sp = 2. * s_frac;
-              calculation_of_coefficent_of_analitical_solution( nodes_of_bndry_bndry, global_dirs_for_atan, a, b, c);
+              calculation_of_coefficent_of_analitical_solution(dim, dim_bdry, face_index_bndry_region_vertex_cords, nodes_on_line_of_bndry_bndry, global_dirs_for_atan, a, b, c);
               d = 1/ ( sp * pow( - c, sp) );
               //preparation coefficent for analitical solution - END
 
@@ -340,8 +350,8 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
 
               //--------- theta's calculus - BEGIN ---------
                 for(unsigned p = 0; p < theta_first_and_last_radius.size(); p++) {
-                   theta_first_and_last_radius[p] = atan2(nodes_of_bndry_bndry [ global_dirs_for_atan[global_dir_second] ][/*n + */p],
-                                                          nodes_of_bndry_bndry [ global_dirs_for_atan[global_dir_first] ][/*n +*/ p]);
+                   theta_first_and_last_radius[p] = atan2(nodes_on_line_of_bndry_bndry [ global_dirs_for_atan[global_dir_second] ][/*n + */p],
+                                                          nodes_on_line_of_bndry_bndry [ global_dirs_for_atan[global_dir_first] ][/*n +*/ p]);
                               }
 
 // // //                 double delta_theta = 0.;
@@ -359,12 +369,14 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               b * ( cos( theta_first_and_last_radius[ theta_of_radius_second ] ) -cos( theta_first_and_last_radius[ theta_of_radius_first] ) ) );
               // integral - END -----
 
-              //======================== ANALITICAL SOLUTION - END ========================
               } //end if ANALITICAL_SOLUTION
+              //======================== ANALITICAL SOLUTION - END ========================
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
-              else{
+
               //======================== NUMERICAL SOLUTION - BEGIN ========================
+              else{
 
 
               //****************** delta coords coarse resize - BEGIN ******************
@@ -469,8 +481,8 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               // compute unbounded integral - END -----
 
 
-              //======================== NUMERICAL SOLUTION - END ========================
               } //end if ANALITICAL_SOLUTION
+              //======================== NUMERICAL SOLUTION - END ========================
 
 
 
