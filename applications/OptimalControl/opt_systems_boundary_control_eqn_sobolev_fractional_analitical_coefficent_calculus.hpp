@@ -17,7 +17,6 @@ namespace ctrl {
 //************************* c parameter calculation - END *************************
 
 
-
 //************************* give a vector return tur if the vector components are the same , false if not - BEGIN *************************
        template < class component_type >
        bool vector_components_are_equal (std::vector<component_type> my_vector){
@@ -29,40 +28,33 @@ namespace ctrl {
        }
 //************************* give a vector return tur if the vector components are the same , false if not - END *************************
 
-//************************* give a vector return if the vector has the component increasing along the integration direction - BEGIN *************************
-bool is_vector_oriented_with_cords_decreasing_along_integration_line_direction(std::vector< std::vector< double > > vector_of_cords, unsigned int direction_of_bndry_bndry_integration_line){
 
-    if( vector_of_cords[direction_of_bndry_bndry_integration_line][1] < vector_of_cords[direction_of_bndry_bndry_integration_line][0]) {return true;}
+//************************* give a vector return if the vector has the component decreasing along specific direction - BEGIN *************************
+bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vector< std::vector< double > > vector_of_cords, unsigned int direction){
+
+    if( vector_of_cords[direction][1] < vector_of_cords[direction][0]) {return true;}
     else {return false;}
 
 }
-//************************* give a vector return if the vector has the component increasing along the integration direction - END *************************
-
-
-
+//************************* give a vector return if the vector has the component decreasing along specific direction - END *************************
 
 
 //************************* integration_extreme_cords - BEGIN *************************
-      std::vector<std::vector<double>> integration_extreme_cords(const unsigned dim,
-                                                                 const unsigned boundary_dim,
-                                                                 std::vector< std::vector< double > >face_index_bndry_region_vertex_cords,
-                                                                 std::vector< std::vector< double > > nodes_on_line_of_bndry_bndry,
-//                                                                  std::vector< unsigned > global_dirs_for_atan,
-                                                                 bool are_nodes_coordinates_decreasing_along_integration_directin,
-                                                                 unsigned int direction_of_bndry_bndry_integration_line,
-                                                                 unsigned int normal_tangential_direction_to_bndry_bndry_integration_line
-//                                                                  ,const unsigned int face_index,
-                                                                 ){
+     std::vector<std::vector<double>> integration_extreme_cords(const unsigned dim,
+                                    const unsigned boundary_dim,
+                                    //-----vector & matrix -------
+                                    std::vector< std::vector< double > >face_index_bndry_region_vertex_cords,
+                                    std::vector< std::vector< double > > nodes_on_line_of_bndry_bndry,
+                                    //------- direction of tangential vector -------
+                                    unsigned int direction_of_bndry_bndry_integration_line,
+                                    unsigned int normal_tangential_direction_to_bndry_bndry_integration_line,
+                                    //----------- orientation ------------
+                                    bool are_nodes_coordinates_decreasing_along_integration_directin,
+                                    //--------- matrix of extreeme of control region --------------
+                                    std::vector<std::vector< double > > & cords_of_analitical_integer_extreme){
 
 
     constexpr unsigned first_node_along_line_of_bndry_bndry = 0;
-
-    //----------------- matrix preparation - BEGIN -----------------
-    std::vector<std::vector<double>> cords_of_analitical_integer_extreme(dim);
-    for(unsigned f = 0; f <  cords_of_analitical_integer_extreme.size(); f++) {
-             cords_of_analitical_integer_extreme[f].resize(boundary_dim);
-         }
-    //----------------- matrix preparation - END -----------------
 
     unsigned int integration_extreme_point_index = 0;
 
@@ -86,7 +78,7 @@ bool is_vector_oriented_with_cords_decreasing_along_integration_line_direction(s
     //----------------- build matrix - END -----------------
 
     //----------------- reverse matrix - BEGIN -----------------
-    bool is_integration_extreme_matrix_decreasing = is_vector_oriented_with_cords_decreasing_along_integration_line_direction(cords_of_analitical_integer_extreme, direction_of_bndry_bndry_integration_line);
+    bool is_integration_extreme_matrix_decreasing = is_vector_oriented_with_cords_decreasing_along_specific_direction(cords_of_analitical_integer_extreme, direction_of_bndry_bndry_integration_line);
     bool is_reserve_vector_needed = ( are_nodes_coordinates_decreasing_along_integration_directin ^ is_integration_extreme_matrix_decreasing );
 
     if( is_reserve_vector_needed ){
@@ -102,25 +94,17 @@ bool is_vector_oriented_with_cords_decreasing_along_integration_line_direction(s
 //************************* integration_extreme_cords - END *************************
 
 
-
-
-
-
 //************************* calculus of parameter for analitical solution of mixed integral - BEGIN *************************
       void calculation_of_coefficent_of_analitical_solution(const unsigned int dim,
                                                             const unsigned int dim_bdry,
+                                                            //-----vector & matrix -------
                                                             std::vector< std::vector< double > >face_index_bndry_region_vertex_cords,
                                                             std::vector< std::vector< double > > nodes_on_line_of_bndry_bndry,
+                                                            //------- tangent vector -------
                                                             std::vector< unsigned int> global_dirs_for_atan,
-//                                                             std::vector< std::vector< double > > extreeme_bndry_bndry_points_coords,
-                                                            double& a,
-                                                            double& b,
-                                                            double& c){
-
-//             double first_direction_point_one;
-//             double second_direction_point_one;
-//             double first_direction_point_two;
-//             double second_direction_point_two;
+                                                            //------- output -------
+                                                            std::vector< std::vector< double > >& analitical_integral_extreme_cords,
+                                                            double& a, double& b, double& c){
 
                 constexpr unsigned global_dir_first = 0;
                 constexpr unsigned global_dir_second = 1;
@@ -129,7 +113,6 @@ bool is_vector_oriented_with_cords_decreasing_along_integration_line_direction(s
 
                 bool are_nodes_coordinates_decreasing_along_integration_directin = false;
 
-            std::vector<std::vector<double>> analitical_integral_extreme_cords;
 
             if( vector_components_are_equal<double>( nodes_on_line_of_bndry_bndry[ global_dirs_for_atan[ global_dir_first ] ] ) ) {
 
@@ -139,26 +122,22 @@ bool is_vector_oriented_with_cords_decreasing_along_integration_line_direction(s
                 a = 1.;
                 b = 0.;
 
-                are_nodes_coordinates_decreasing_along_integration_directin = is_vector_oriented_with_cords_decreasing_along_integration_line_direction(nodes_on_line_of_bndry_bndry, direction_of_bndry_bndry_integration_line);
+                are_nodes_coordinates_decreasing_along_integration_directin = is_vector_oriented_with_cords_decreasing_along_specific_direction(nodes_on_line_of_bndry_bndry, direction_of_bndry_bndry_integration_line);
 
                 analitical_integral_extreme_cords =integration_extreme_cords(dim,
                                                                              dim_bdry,
+                                                                             //-----vector & matrix -------
                                                                              face_index_bndry_region_vertex_cords,
                                                                              nodes_on_line_of_bndry_bndry,
-//                                                                              global_dirs_for_atan,
-                                                                             are_nodes_coordinates_decreasing_along_integration_directin,
+                                                                             //------- direction of tangential vector -------
                                                                              direction_of_bndry_bndry_integration_line,
-                                                                             normal_tangential_direction_to_bndry_bndry_integration_line
-//                                                                              ,face_index,
-                                                                             );
+                                                                             normal_tangential_direction_to_bndry_bndry_integration_line,
+                                                                             //----------- orientation ------------
+                                                                             are_nodes_coordinates_decreasing_along_integration_directin,
+                                                                             //--------- matrix of extreeme of control region --------------
+                                                                             analitical_integral_extreme_cords);
 
                 c = calculation_c_parameter( nodes_on_line_of_bndry_bndry[ global_dirs_for_atan[  global_dir_first ] ][ first_node_along_line_of_bndry_bndry ] );
-
-//                 extreeme_bndry_bndry_points_coords[ global_dirs_for_atan[ 0 /*global_dir_first*/ ] ][0] = nodes_on_line_of_bndry_bndry[ global_dirs_for_atan[ 0 /*global_dir_first*/ ] ][ 0 ];
-//                 extreeme_bndry_bndry_points_coords[ global_dirs_for_atan[ 0 /*global_dir_first*/ ] ][1] = extreeme_bndry_bndry_points_coords[ global_dirs_for_atan[ 0 /*global_dir_first*/ ] ][0];
-//
-//                 extreeme_bndry_bndry_points_coords[ global_dirs_for_atan[ 1 /*global_dir_second*/ ] ][0] = nodes_on_line_of_bndry_bndry[ global_dirs_for_atan[ 0 /*global_dir_first*/ ] ][ 0 ];
-//                 extreeme_bndry_bndry_points_coords[ global_dirs_for_atan[ 1 /*global_dir_second*/ ] ][1] = extreeme_bndry_bndry_points_coords[ global_dirs_for_atan[ 0 /*global_dir_first*/ ] ][0];
 
             }
             else if( vector_components_are_equal<double>( nodes_on_line_of_bndry_bndry[ global_dirs_for_atan[  global_dir_second ] ] ) ) {
@@ -169,18 +148,20 @@ bool is_vector_oriented_with_cords_decreasing_along_integration_line_direction(s
                 a = 0.;
                 b = 1.;
 
-                are_nodes_coordinates_decreasing_along_integration_directin = is_vector_oriented_with_cords_decreasing_along_integration_line_direction(nodes_on_line_of_bndry_bndry, direction_of_bndry_bndry_integration_line);
+                are_nodes_coordinates_decreasing_along_integration_directin = is_vector_oriented_with_cords_decreasing_along_specific_direction(nodes_on_line_of_bndry_bndry, direction_of_bndry_bndry_integration_line);
 
                 analitical_integral_extreme_cords =integration_extreme_cords(dim,
                                                                              dim_bdry,
+                                                                             //-----vector & matrix -------
                                                                              face_index_bndry_region_vertex_cords,
                                                                              nodes_on_line_of_bndry_bndry,
-//                                                                              global_dirs_for_atan,
-                                                                             are_nodes_coordinates_decreasing_along_integration_directin,
+                                                                             //------- direction of tangential vector -------
                                                                              direction_of_bndry_bndry_integration_line,
-                                                                             normal_tangential_direction_to_bndry_bndry_integration_line
-//                                                                              ,face_index,
-                                                                             );
+                                                                             normal_tangential_direction_to_bndry_bndry_integration_line,
+                                                                             //----------- orientation ------------
+                                                                             are_nodes_coordinates_decreasing_along_integration_directin,
+                                                                             //--------- matrix of extreeme of control region --------------
+                                                                             analitical_integral_extreme_cords);
 
                 c = calculation_c_parameter( nodes_on_line_of_bndry_bndry[ global_dirs_for_atan[ global_dir_second ] ][ first_node_along_line_of_bndry_bndry ] );
             }
@@ -188,9 +169,8 @@ bool is_vector_oriented_with_cords_decreasing_along_integration_line_direction(s
 //************************* calculus of parameter for analitical solution of mixed integral - END *************************
 
 
-
-
  } //end namespace ctrl
+
 } //end namespace femus
 
 

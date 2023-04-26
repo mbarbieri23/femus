@@ -248,10 +248,8 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
 
          double mixed_denominator_numerical = 0.;
          
-          //create matrix of coordinate of bndry bndry nodes - BEGIN
-
-         unsigned number_of_nodes = jel_n_faces_faces;
-
+          //**************************** create matrix of coordinate of bndry bndry nodes - BEGIN ****************************
+            unsigned number_of_nodes = jel_n_faces_faces;
             std::vector< std::vector< double > > face_index_bndry_region_vertex_cords =
             LIST_OF_CTRL_FACES ::face_index_bndry_bndry_vertex_cords_normal_outgoing(j_element_face_index,
                                                                         dim_bdry,
@@ -260,8 +258,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                                                                         0.75,
                                                                         0.25,
                                                                         0.75);
-
-          //create matrix of coordinate of bndry bndry nodes - END
+          //**************************** create matrix of coordinate of bndry bndry nodes - END ****************************
 
 
          for(unsigned e_bdry_bdry = 0; e_bdry_bdry < jel_n_faces_faces; e_bdry_bdry++) {  //loop over face of face
@@ -334,12 +331,30 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               //****************** node at boundary of the boundary - END ******************
 
 
-              //preparation coefficent for analitical solution - BEGIN
+              //****************** preparation coefficent and extreme for analitical solution - BEGIN ******************
+              //---------- coefficent declaration - BEGIN ----------
               double a, b, c, d, sp;
+              //---------- coefficent declaration - END ----------
+              //----------------- matrix preparation - BEGIN -----------------
+              std::vector<std::vector<double>> cords_of_analitical_integer_extreme(dim);
+              for(unsigned f = 0; f <  cords_of_analitical_integer_extreme.size(); f++) {
+                       cords_of_analitical_integer_extreme[f].resize(dim_bdry);
+                   }
+              //----------------- matrix preparation - END -----------------
+
               sp = 2. * s_frac;
-              calculation_of_coefficent_of_analitical_solution(dim, dim_bdry, face_index_bndry_region_vertex_cords, nodes_on_line_of_bndry_bndry, global_dirs_for_atan, a, b, c);
+              calculation_of_coefficent_of_analitical_solution(dim,
+                                                               dim_bdry,
+                                                               //-----vector & matrix -------
+                                                               face_index_bndry_region_vertex_cords,
+                                                               nodes_on_line_of_bndry_bndry,
+                                                               //------- tangent vector -------
+                                                               global_dirs_for_atan,
+                                                               //------- output -------
+                                                               cords_of_analitical_integer_extreme,
+                                                               a, b, c);
               d = 1/ ( sp * pow( - c, sp) );
-              //preparation coefficent for analitical solution - END
+              //****************** preparation coefficent and extreme for analitical solution - END ******************
 
               //************ theta's - BEGIN ************
               //--------- theta declaration - BEGIN ---------
@@ -350,8 +365,8 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
 
               //--------- theta's calculus - BEGIN ---------
                 for(unsigned p = 0; p < theta_first_and_last_radius.size(); p++) {
-                   theta_first_and_last_radius[p] = atan2(nodes_on_line_of_bndry_bndry [ global_dirs_for_atan[global_dir_second] ][/*n + */p],
-                                                          nodes_on_line_of_bndry_bndry [ global_dirs_for_atan[global_dir_first] ][/*n +*/ p]);
+                   theta_first_and_last_radius[p] = atan2(cords_of_analitical_integer_extreme [ global_dirs_for_atan[global_dir_second] ][/*n + */p],
+                                                          cords_of_analitical_integer_extreme [ global_dirs_for_atan[global_dir_first] ][/*n +*/ p]);
                               }
 
 // // //                 double delta_theta = 0.;
