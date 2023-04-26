@@ -144,9 +144,9 @@ static bool is_face_on_maximal_coordinate_by_tangential_component(std::vector<  
 
 
 
-//-------------- create_matrix_of_cords_of_bndry_bndry_points_from_face_index- BEGIN --------------
+//-------------- face_index_bndry_bndry_vertex_cords_normal_outgoing- BEGIN --------------
 
-     static std::vector< std::vector< double > > create_matrix_of_cords_of_bndry_bndry_points_from_face_index(const unsigned int face_index,
+     static std::vector< std::vector< double > > face_index_bndry_bndry_vertex_cords_normal_outgoing(const unsigned int face_index,
                                                                                                               const unsigned boundary_dim,
                                                                                                               const unsigned numbers_of_nodes,
                                                                                                               const double first_direction_value_one,
@@ -212,7 +212,7 @@ static bool is_face_on_maximal_coordinate_by_tangential_component(std::vector<  
 
     }
 
-//-------------- create_matrix_of_cords_of_bndry_bndry_points_from_face_index- END --------------
+//-------------- face_index_bndry_bndry_vertex_cords_normal_outgoing- END --------------
 
  };
  

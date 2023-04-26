@@ -253,7 +253,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
          unsigned number_of_nodes = jel_n_faces_faces;
 
             std::vector< std::vector< double > > face_index_bndry_region_vertex_cords =
-            LIST_OF_CTRL_FACES ::create_matrix_of_cords_of_bndry_bndry_points_from_face_index(j_element_face_index,
+            LIST_OF_CTRL_FACES ::face_index_bndry_bndry_vertex_cords_normal_outgoing(j_element_face_index,
                                                                         dim_bdry,
                                                                         number_of_nodes,
                                                                         0.25,

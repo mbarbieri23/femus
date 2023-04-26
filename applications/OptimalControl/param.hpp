@@ -61,7 +61,7 @@ namespace ctrl {
 
 //*********************** Mesh, Number of refinements - BEGIN *****************************************
 // #define N_UNIFORM_LEVELS 6 // for 2D applications
-#define N_UNIFORM_LEVELS 3 // for 3D bdry application
+#define N_UNIFORM_LEVELS 2 // for 3D bdry application
 
 #define N_ERASED_LEVELS   N_UNIFORM_LEVELS - 1
 
@@ -133,7 +133,7 @@ namespace ctrl {
 
   #define UNBOUNDED   1
 
-  #define ANALITICAL_SOLUTION   0 /*1*/
+  #define ANALITICAL_SOLUTION   /*0*/ 1
 
   #define USE_Cns     1
 
@@ -349,11 +349,11 @@ namespace ctrl {
 //------------------------------------ single: BEGIN ------------------------------------
 
 // #define  GAMMA_CONTROL_LIST_OF_FACES_WITH_EXTREMES    TYPE_OF_BOUNDARY_CONTROL :: DOMAIN_NAMESPACE_CHILD :: List_of_Gamma_control_faces_One
-#define  GAMMA_CONTROL_LIST_OF_FACES_WITH_EXTREMES    TYPE_OF_BOUNDARY_CONTROL :: DOMAIN_NAMESPACE_CHILD :: List_of_Gamma_control_faces_Two
+// #define  GAMMA_CONTROL_LIST_OF_FACES_WITH_EXTREMES    TYPE_OF_BOUNDARY_CONTROL :: DOMAIN_NAMESPACE_CHILD :: List_of_Gamma_control_faces_Two
 // #define  GAMMA_CONTROL_LIST_OF_FACES_WITH_EXTREMES    TYPE_OF_BOUNDARY_CONTROL :: DOMAIN_NAMESPACE_CHILD :: List_of_Gamma_control_faces_Three
 // #define  GAMMA_CONTROL_LIST_OF_FACES_WITH_EXTREMES    TYPE_OF_BOUNDARY_CONTROL :: DOMAIN_NAMESPACE_CHILD :: List_of_Gamma_control_faces_Four
 // #define  GAMMA_CONTROL_LIST_OF_FACES_WITH_EXTREMES    TYPE_OF_BOUNDARY_CONTROL :: DOMAIN_NAMESPACE_CHILD :: List_of_Gamma_control_faces_Five
-// #define  GAMMA_CONTROL_LIST_OF_FACES_WITH_EXTREMES    TYPE_OF_BOUNDARY_CONTROL :: DOMAIN_NAMESPACE_CHILD :: List_of_Gamma_control_faces_Six
+#define  GAMMA_CONTROL_LIST_OF_FACES_WITH_EXTREMES    TYPE_OF_BOUNDARY_CONTROL :: DOMAIN_NAMESPACE_CHILD :: List_of_Gamma_control_faces_Six
 
 #define NAMESPACE_FOR_GAMMA_C_BOUNDARY_CONDITIONS    TYPE_OF_BOUNDARY_CONTROL :: DOMAIN_NAMESPACE_CHILD :: Multiple_controls_and_homogeneous_boundary_conditions
 
