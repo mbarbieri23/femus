@@ -168,6 +168,51 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
       }
 //************************* calculus of parameter for analitical solution of mixed integral - END *************************
 
+// geom_element_iel.get_elem_center_bdry_3d()[direction]
+//************************* Extreme of analitical integration - BEGIN *************************
+//      std::vector<std::vector<double>> extreme_of_analitical_integration(//------- direction of tangential vector -------
+//                                                                         const unsigned first_tangential_direction,
+//                                                                         const unsigned second_tangential_direction,
+//                                                                         //------- vector of nodes along element face
+//                                                                         vector< vector< double > > nodes_along_line,
+//                                                                         //------- extreme fo the integration
+//                                                                         std::vector<std::vector<double>> cords_of_analitical_integer_extreme){
+//
+//
+//
+//     //----------------- build matrix - BEGIN -----------------
+//     for(unsigned pt = 0; pt <  face_index_bndry_region_vertex_cords[normal_tangential_direction_to_bndry_bndry_integration_line].size(); pt++) {
+//
+//         if( face_index_bndry_region_vertex_cords[normal_tangential_direction_to_bndry_bndry_integration_line][pt] ==
+//             nodes_on_line_of_bndry_bndry[normal_tangential_direction_to_bndry_bndry_integration_line][first_node_along_line_of_bndry_bndry]) {
+//
+//             for(unsigned dir = 0; dir <  cords_of_analitical_integer_extreme.size(); dir++) {
+//
+//                 cords_of_analitical_integer_extreme[dir][integration_extreme_point_index] = face_index_bndry_region_vertex_cords[dir][pt];
+//
+//             }
+//          integration_extreme_point_index++; //add +1 only if you add something in the matrix cords_of_analitical_integer_extreme
+//
+//         }
+//
+//     }
+//     //----------------- build matrix - END -----------------
+//
+//     //----------------- reverse matrix - BEGIN -----------------
+//     bool is_integration_extreme_matrix_decreasing = is_vector_oriented_with_cords_decreasing_along_specific_direction(cords_of_analitical_integer_extreme, direction_of_bndry_bndry_integration_line);
+//     bool is_reserve_vector_needed = ( are_nodes_coordinates_decreasing_along_integration_directin ^ is_integration_extreme_matrix_decreasing );
+//
+//     if( is_reserve_vector_needed ){
+//             for(unsigned dir = 0; dir <  cords_of_analitical_integer_extreme.size(); dir++) {
+//              std::reverse( cords_of_analitical_integer_extreme[dir].begin(), cords_of_analitical_integer_extreme[dir].end() );
+//             }
+//     }
+//     //----------------- reverse matrix - END -----------------
+//
+//     return cords_of_analitical_integer_extreme;
+//
+// }
+//************************* Extreme of analitical integration - END *************************
 
  } //end namespace ctrl
 

@@ -61,7 +61,7 @@ namespace ctrl {
 
 //*********************** Mesh, Number of refinements - BEGIN *****************************************
 // #define N_UNIFORM_LEVELS 6 // for 2D applications
-#define N_UNIFORM_LEVELS 2 // for 3D bdry application
+#define N_UNIFORM_LEVELS 3 // for 3D bdry application
 
 #define N_ERASED_LEVELS   N_UNIFORM_LEVELS - 1
 
@@ -133,8 +133,8 @@ namespace ctrl {
 
   #define UNBOUNDED   1
 
-  #define ANALITICAL_SOLUTION   /*0*/ 1
 
+  #define ANALITICAL_SOLUTION   0/*1*/
   #define USE_Cns     1
 
 #elif NORM_GIR_RAV == 1 

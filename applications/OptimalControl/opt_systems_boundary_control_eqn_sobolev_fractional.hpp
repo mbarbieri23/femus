@@ -211,6 +211,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
     //============ Mixed Integral 2D - Numerical ==================      
       else if (dim_bdry == 2) {           
 
+
   // ctrl face to node-node association
  std::map<unsigned int, unsigned int >  ctrl_faces_VS_their_nodes = LIST_OF_CTRL_FACES :: from_ctrl_faces_to_their_boundaries();
  
@@ -260,63 +261,40 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                                                                         0.75);
           //**************************** create matrix of coordinate of bndry bndry nodes - END ****************************
 
+          // what are the global axes that are consistent with outgoing normal - BEGIN -----
+
+             std::vector< unsigned > global_dirs_for_atan(dim_bdry);
+             constexpr unsigned global_dir_first = 0;
+             constexpr unsigned global_dir_second = 1;
+             global_dirs_for_atan = LIST_OF_CTRL_FACES ::tangential_direction_to_Gamma_control(i_element_face_index, dim_bdry);
+
+              global_dirs_for_atan[global_dir_first ] = ( ( ( j_element_face_index /*LIST_OF_CTRL_FACES :: _face_with_extremes_index[0] *//*FACE_FOR_CONTROL*/ - 1) / 2 ) + 1 ) % 3;
+              global_dirs_for_atan[global_dir_second] = ( global_dirs_for_atan[0] + 1 ) % 3 ;
+              if ( (j_element_face_index /*LIST_OF_CTRL_FACES :: _face_with_extremes_index[0] */% 2) == 1 ) {  std::reverse(global_dirs_for_atan.begin(), global_dirs_for_atan.end()); }
+
+               unsigned int first_tangential_direction = global_dirs_for_atan[global_dir_first];
+               unsigned int second_tangential_direction = global_dirs_for_atan[global_dir_second];
+          //  what are the global axes that are consistent with outgoing normal - END -----
 
          for(unsigned e_bdry_bdry = 0; e_bdry_bdry < jel_n_faces_faces; e_bdry_bdry++) {  //loop over face of face
 
-              
+
               unsigned jel_n_dofs_bdry_bdry =  msh->el->GetNFACENODES(jel_geom_type_face, e_bdry_bdry, solType_coords); //number of nodes on face of face
 
-              // look for boundary of boundary faces - BEGIN
-                  std::vector < int > nodes_face_face_flags(jel_n_dofs_bdry_bdry, 0); 
-
-              //nodes_face_face_flags  - BEGIN
-              for(unsigned jdof_bdry_bdry = 0; jdof_bdry_bdry < jel_n_dofs_bdry_bdry; jdof_bdry_bdry++) {  //loop over number of nodes on face of face
-
-                // jnode mapping to element and to volume node - BEGIN
-                unsigned jnode_bdry_bdry     = msh->el->GetIG(jel_geom_type_face, e_bdry_bdry, jdof_bdry_bdry); // face-to-element local node mapping.
-                unsigned jnode_bdry_bdry_vol = msh->el->GetIG(jel_geom_type, jface, jnode_bdry_bdry);// face-to-volume local node mapping.
-                // jnode mapping to element and to volume node - END
-
-              // nodes_face_face_flags  -----
-                unsigned node_global = msh->el->GetElementDofIndex(jel, jnode_bdry_bdry_vol);
-                nodes_face_face_flags[jdof_bdry_bdry] = (*sol->_Sol[sol_node_flag_index])(node_global);
-              }
-              //nodes_face_face_flags  - END
-
-                bool is_face_bdry_bdry  =  MED_IO::boundary_of_boundary_3d_check_face_of_face_via_nodes( nodes_face_face_flags, t_med_flag_of_node_bdry_bdry_for_control_face);
-              // look for boundary of boundary faces - END
-                
-
-              if(is_face_bdry_bdry) {
-
-
-
-               // what are the global axes that are consistent with outgoing normal - BEGIN -----
-
-                  std::vector< unsigned > global_dirs_for_atan(dim_bdry);
-                  constexpr unsigned global_dir_first = 0;
-                  constexpr unsigned global_dir_second = 1;
-                  global_dirs_for_atan = LIST_OF_CTRL_FACES ::tangential_direction_to_Gamma_control(i_element_face_index, dim_bdry);
-
-//                 global_dirs_for_atan[global_dir_first ] = ( ( ( j_element_face_index /*LIST_OF_CTRL_FACES :: _face_with_extremes_index[0] *//*FACE_FOR_CONTROL*/ - 1) / 2 ) + 1 ) % 3;
-//                 global_dirs_for_atan[global_dir_second] = ( global_dirs_for_atan[0] + 1 ) % 3 ;
-//                 if ( (j_element_face_index /*LIST_OF_CTRL_FACES :: _face_with_extremes_index[0] */% 2) == 1 ) {  std::reverse(global_dirs_for_atan.begin(), global_dirs_for_atan.end()); }
-
-               //  what are the global axes that are consistent with outgoing normal - END -----
 
 
               //======================== ANALITICAL SOLUTION - BEGIN ========================
-              if( analitical_solution == 1){
+              if( analitical_solution == 1 && check_if_same_elem( TEST_JEL_SINGLE_FOR_LOOP , jel) ){
 
-              //****************** node at boundary of the boundary - BEGIN ******************
-              //------------ node at boundary of the boundary 3 X 3 - BEGIN ------------
-              vector  < vector  <  double> > nodes_on_line_of_bndry_bndry(dim);    // A matrix holding the face coordinates rowwise.
+              //****************** node at boundary of the boundary 3 X 3 - BEGIN ******************
+              //------------ node at boundary of the boundary declaration - BEGIN ------------
+              vector< vector< double > > nodes_on_line_of_bndry_bndry(dim);    // A matrix holding the face coordinates rowwise.
               for(int k = 0; k < dim; k++) {
                 nodes_on_line_of_bndry_bndry[k].resize(jel_n_dofs_bdry_bdry);
               }
-              //------------ node at boundary of the boundary 3 X 3 - END ------------
+              //------------ node at boundary of the boundary declaration - END ------------
 
-              //------------ node at boundary of the boundary - BEGIN ------------
+              //------------ node at boundary of the boundary built - BEGIN ------------
                for(unsigned jdof_bdry_bdry = 0; jdof_bdry_bdry < jel_n_dofs_bdry_bdry; jdof_bdry_bdry++) {
 
                    unsigned jnode_bdry_bdry     = msh->el->GetIG(jel_geom_type_face, e_bdry_bdry, jdof_bdry_bdry); // face-to-element local node mapping.
@@ -327,8 +305,8 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                    }
 
                }
-              //------------ node at boundary of the boundary - END ------------
-              //****************** node at boundary of the boundary - END ******************
+              //------------ node at boundary of the boundary built - END ------------
+              //****************** node at boundary of the boundary 3 X 3 - END ******************
 
 
               //****************** preparation coefficent and extreme for analitical solution - BEGIN ******************
@@ -394,6 +372,29 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               else{
 
 
+              // look for boundary of boundary faces - BEGIN
+                  std::vector < int > nodes_face_face_flags(jel_n_dofs_bdry_bdry, 0);
+
+              //nodes_face_face_flags  - BEGIN
+              for(unsigned jdof_bdry_bdry = 0; jdof_bdry_bdry < jel_n_dofs_bdry_bdry; jdof_bdry_bdry++) {  //loop over number of nodes on face of face
+
+                // jnode mapping to element and to volume node - BEGIN
+                unsigned jnode_bdry_bdry     = msh->el->GetIG(jel_geom_type_face, e_bdry_bdry, jdof_bdry_bdry); // face-to-element local node mapping.
+                unsigned jnode_bdry_bdry_vol = msh->el->GetIG(jel_geom_type, jface, jnode_bdry_bdry);// face-to-volume local node mapping.
+                // jnode mapping to element and to volume node - END
+
+              // nodes_face_face_flags  -
+                unsigned node_global = msh->el->GetElementDofIndex(jel, jnode_bdry_bdry_vol);
+                nodes_face_face_flags[jdof_bdry_bdry] = (*sol->_Sol[sol_node_flag_index])(node_global);
+              }
+              //nodes_face_face_flags  - END
+
+                bool is_face_bdry_bdry  =  MED_IO::boundary_of_boundary_3d_check_face_of_face_via_nodes( nodes_face_face_flags, t_med_flag_of_node_bdry_bdry_for_control_face);
+              // look for boundary of boundary faces - END
+
+              if(is_face_bdry_bdry) {
+
+
               //****************** delta coords coarse resize - BEGIN ******************
 
                  //------------ delta coords coarse resize 3 X 3 - BEGIN ------------
@@ -445,18 +446,13 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               for(unsigned n = 0; n < n_divisions_face_of_face; n++) {
 
 
+              //************ theta's - BEGIN ************
               //--------- theta declaration - BEGIN ---------
               std::vector< double > theta_first_and_last_radius(2);
               constexpr unsigned theta_of_radius_first = 0;
               constexpr unsigned theta_of_radius_second = 1;
               //--------- theta declaration - END ---------
-
-                //************ theta's - BEGIN ************
-
-
 ///@todooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-
-
               // theta's calculus - BEGIN -----
                 for(unsigned p = 0; p < theta_first_and_last_radius.size(); p++) {
                    theta_first_and_last_radius[p] = atan2(radius_centered_at_x_qp_of_iface_bdry_bdry_refined[ global_dirs_for_atan[global_dir_second] ][n + p],
@@ -496,7 +492,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               // compute unbounded integral - END -----
 
 
-              } //end if ANALITICAL_SOLUTION
+              } // end if(is_face_bdry_bdry)
               //======================== NUMERICAL SOLUTION - END ========================
 
 
@@ -504,7 +500,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
 
 
 
-              } // end if(is_face_bdry_bdry)
+              } //end else ANALITICAL_SOLUTION
               
             }  //end face of face loop
             
