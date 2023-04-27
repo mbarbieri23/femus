@@ -140,10 +140,6 @@ static bool is_face_on_maximal_coordinate_by_tangential_component(std::vector<  
       }
       
 
-// static std::vector< double>  exteeme_value_along_some_direction (){}
-
-
-
 //-------------- face_index_bndry_bndry_vertex_cords_normal_outgoing- BEGIN --------------
 
      static std::vector< std::vector< double > > face_index_bndry_bndry_vertex_cords_normal_outgoing(const unsigned int face_index,

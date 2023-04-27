@@ -27,7 +27,6 @@ namespace  square_or_cube {
 //*********************** Find volume elements that contain a Control domain element *********************************
 template < class LIST_OF_CTRL_FACES >
 class Domain_elements_containing_Gamma_control  {
-
 };
 
 //*********************** Pure boundary - BEGIN *********************************

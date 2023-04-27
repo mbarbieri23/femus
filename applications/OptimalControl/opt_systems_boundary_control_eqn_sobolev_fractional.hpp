@@ -1,6 +1,7 @@
 #ifndef __opt_systems_boundary_control_eqn_sobolev_fractional_hpp__
 #define __opt_systems_boundary_control_eqn_sobolev_fractional_hpp__
 
+#include "square_or_cube_01_control_faces.hpp"
 
 #include "FemusDefault.hpp"
 
@@ -34,7 +35,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
 //*********************** Mesh independent, ALMOST - BEGIN *****************************************
  
  public:
-  
+
   static void unbounded_integral_over_exterior_of_boundary_control_face(
 //
 //                       int & count,
@@ -92,7 +93,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
   unsigned nDof_iel_vec = 0;
         for (unsigned c = 0; c < n_components_ctrl; c++) {nDof_iel_vec  +=  nDof_vol_iel[c];    }
 
-  
+  std::vector<double> element_face_center_3d = geom_element_jel.get_elem_center_bdry_3d();
       
   if(unbounded == 1) {
       
@@ -248,18 +249,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
             unsigned jel_n_faces_faces  =  msh->el->GetNFC(jel_geom_type, jel_geom_type_face); /* ElementFaceFaceNumber */
 
          double mixed_denominator_numerical = 0.;
-         
-          //**************************** create matrix of coordinate of bndry bndry nodes - BEGIN ****************************
-            unsigned number_of_nodes = jel_n_faces_faces;
-            std::vector< std::vector< double > > face_index_bndry_region_vertex_cords =
-            LIST_OF_CTRL_FACES ::face_index_bndry_bndry_vertex_cords_normal_outgoing(j_element_face_index,
-                                                                        dim_bdry,
-                                                                        number_of_nodes,
-                                                                        0.25,
-                                                                        0.75,
-                                                                        0.25,
-                                                                        0.75);
-          //**************************** create matrix of coordinate of bndry bndry nodes - END ****************************
+
 
           // what are the global axes that are consistent with outgoing normal - BEGIN -----
 
@@ -268,15 +258,23 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
              constexpr unsigned global_dir_second = 1;
              global_dirs_for_atan = LIST_OF_CTRL_FACES ::tangential_direction_to_Gamma_control(i_element_face_index, dim_bdry);
 
-              global_dirs_for_atan[global_dir_first ] = ( ( ( j_element_face_index /*LIST_OF_CTRL_FACES :: _face_with_extremes_index[0] *//*FACE_FOR_CONTROL*/ - 1) / 2 ) + 1 ) % 3;
-              global_dirs_for_atan[global_dir_second] = ( global_dirs_for_atan[0] + 1 ) % 3 ;
-              if ( (j_element_face_index /*LIST_OF_CTRL_FACES :: _face_with_extremes_index[0] */% 2) == 1 ) {  std::reverse(global_dirs_for_atan.begin(), global_dirs_for_atan.end()); }
+//               global_dirs_for_atan[global_dir_first ] = ( ( ( j_element_face_index /*LIST_OF_CTRL_FACES :: _face_with_extremes_index[0] *//*FACE_FOR_CONTROL*/ - 1) / 2 ) + 1 ) % 3;
+//               global_dirs_for_atan[global_dir_second] = ( global_dirs_for_atan[0] + 1 ) % 3 ;
+//               if ( (j_element_face_index /*LIST_OF_CTRL_FACES :: _face_with_extremes_index[0] */% 2) == 1 ) {  std::reverse(global_dirs_for_atan.begin(), global_dirs_for_atan.end()); }
 
                unsigned int first_tangential_direction = global_dirs_for_atan[global_dir_first];
                unsigned int second_tangential_direction = global_dirs_for_atan[global_dir_second];
           //  what are the global axes that are consistent with outgoing normal - END -----
 
-         for(unsigned e_bdry_bdry = 0; e_bdry_bdry < jel_n_faces_faces; e_bdry_bdry++) {  //loop over face of face
+            //normal direction - BEGIN
+            unsigned int normal_dir =  LIST_OF_CTRL_FACES :: normal_direction_to_Gamma_control( j_element_face_index);
+            //normal direction - END
+
+//               std::vector<std::vector< double > > face_index_direction_extreme_bdry_region = LIST_OF_CTRL_FACES::get_extreme_for_each_direction< LIST_OF_CTRL_FACES >( i_element_face_index, global_dirs_for_atan, normal_dir);
+
+
+
+               for(unsigned e_bdry_bdry = 0; e_bdry_bdry < jel_n_faces_faces; e_bdry_bdry++) {  //loop over face of face
 
 
               unsigned jel_n_dofs_bdry_bdry =  msh->el->GetNFACENODES(jel_geom_type_face, e_bdry_bdry, solType_coords); //number of nodes on face of face
@@ -286,33 +284,41 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               //======================== ANALITICAL SOLUTION - BEGIN ========================
               if( analitical_solution == 1 && check_if_same_elem( TEST_JEL_SINGLE_FOR_LOOP , jel) ){
 
-              //****************** node at boundary of the boundary 3 X 3 - BEGIN ******************
-              //------------ node at boundary of the boundary declaration - BEGIN ------------
-              vector< vector< double > > nodes_on_line_of_bndry_bndry(dim);    // A matrix holding the face coordinates rowwise.
-              for(int k = 0; k < dim; k++) {
-                nodes_on_line_of_bndry_bndry[k].resize(jel_n_dofs_bdry_bdry);
-              }
-              //------------ node at boundary of the boundary declaration - END ------------
 
-              //------------ node at boundary of the boundary built - BEGIN ------------
-               for(unsigned jdof_bdry_bdry = 0; jdof_bdry_bdry < jel_n_dofs_bdry_bdry; jdof_bdry_bdry++) {
+              //------------------------------------------------------------------------------------
+              //****************** node at element boundary face line 3 X 3 - BEGIN ******************
+              //------------------------------------------------------------------------------------
+              //------------ node at element boundary face line declaration - BEGIN ------------
+              vector< vector< double > > nodes_on_element_boundary_face_line(dim);    // A matrix holding the face coordinates rowwise.
+              for(int k = 0; k < dim; k++) {
+                nodes_on_element_boundary_face_line[k].resize(jel_n_dofs_bdry_bdry);
+              }
+              //------------ node at element boundary face line declaration - END ------------
+
+              //------------ node at element boundary face line built - BEGIN ------------
+               for(unsigned jdof_bdry_bdry = 0; jdof_bdry_bdry < jel_n_dofs_bdry_bdry; jdof_bdry_bdry++) {  //loop over number of nodes on face of face
 
                    unsigned jnode_bdry_bdry     = msh->el->GetIG(jel_geom_type_face, e_bdry_bdry, jdof_bdry_bdry); // face-to-element local node mapping.
                    unsigned jnode_bdry_bdry_vol = msh->el->GetIG(jel_geom_type, jface, jnode_bdry_bdry);
 
                    for(unsigned k = 0; k < dim; k++) {
-                   nodes_on_line_of_bndry_bndry[k][jdof_bdry_bdry] = geom_element_jel.get_coords_at_dofs_3d()[k][jnode_bdry_bdry_vol];
+                   nodes_on_element_boundary_face_line[k][jdof_bdry_bdry] = geom_element_jel.get_coords_at_dofs_3d()[k][jnode_bdry_bdry_vol];
                    }
-
                }
-              //------------ node at boundary of the boundary built - END ------------
-              //****************** node at boundary of the boundary 3 X 3 - END ******************
+              //------------ node at element boundary face line built - END ------------
+              //------------------------------------------------------------------------------------
+              //****************** node at element boundary face line 3 X 3 - END ******************
+              //------------------------------------------------------------------------------------
 
 
+              //------------------------------------------------------------------------------------
               //****************** preparation coefficent and extreme for analitical solution - BEGIN ******************
+              //------------------------------------------------------------------------------------
+
               //---------- coefficent declaration - BEGIN ----------
               double a, b, c, d, sp;
               //---------- coefficent declaration - END ----------
+
               //----------------- matrix preparation - BEGIN -----------------
               std::vector<std::vector<double>> cords_of_analitical_integer_extreme(dim);
               for(unsigned f = 0; f <  cords_of_analitical_integer_extreme.size(); f++) {
@@ -321,20 +327,29 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               //----------------- matrix preparation - END -----------------
 
               sp = 2. * s_frac;
-              calculation_of_coefficent_of_analitical_solution(dim,
-                                                               dim_bdry,
-                                                               //-----vector & matrix -------
-                                                               face_index_bndry_region_vertex_cords,
-                                                               nodes_on_line_of_bndry_bndry,
-                                                               //------- tangent vector -------
-                                                               global_dirs_for_atan,
-                                                               //------- output -------
-                                                               cords_of_analitical_integer_extreme,
-                                                               a, b, c);
+              calculation_of_coefficent_of_analitical_solution< LIST_OF_CTRL_FACES >(j_element_face_index,
+                                                                                     //dim,
+                                                                                     //dim_bdry,
+                                                                                     //-----element face center
+                                                                                     element_face_center_3d,
+                                                                                     //-----vector & matrix -------
+//                                                                                      face_index_direction_extreme_bdry_region,
+                                                                                     nodes_on_element_boundary_face_line,
+                                                                                     //------- tangent vector -------
+                                                                                     global_dirs_for_atan,
+                                                                                     //------- normal direction -------
+                                                                                     normal_dir,
+                                                                                     //------- output -------
+                                                                                     cords_of_analitical_integer_extreme,
+                                                                                     a, b, c);
               d = 1/ ( sp * pow( - c, sp) );
+              //------------------------------------------------------------------------------------
               //****************** preparation coefficent and extreme for analitical solution - END ******************
+              //------------------------------------------------------------------------------------
 
+              //------------------------------------------------------------------------------------
               //************ theta's - BEGIN ************
+              //------------------------------------------------------------------------------------
               //--------- theta declaration - BEGIN ---------
               std::vector< double > theta_first_and_last_radius(2);
               constexpr unsigned theta_of_radius_first = 0;
@@ -354,7 +369,9 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                     theta_first_and_last_radius[theta_of_radius_second ] += 2. * M_PI;
                 }
               //--------- theta's calculus - END ---------
+              //------------------------------------------------------------------------------------
               //************ theta's - END ************
+              //------------------------------------------------------------------------------------
 
               // integral - BEGIN -----
               mixed_denominator_numerical += d * (
