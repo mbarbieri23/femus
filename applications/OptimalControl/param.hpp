@@ -133,6 +133,7 @@ namespace ctrl {
 
   #define UNBOUNDED   1
 
+//   #define ANALITICAL_SOLUTION 0
   #define ANALITICAL_SOLUTION 1
 
   #define USE_Cns     1

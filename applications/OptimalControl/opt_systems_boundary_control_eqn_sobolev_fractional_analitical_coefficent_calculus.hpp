@@ -91,7 +91,6 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
                                                                 std::vector<double> element_face_center_3d,
                                                                 //-----vector & matrix -------
                                                                 std::vector< std::vector< double > >face_index_extreme_3d_along_direction,
-//                                                                 std::vector< std::vector< double > >face_index_bndry_region_vertex_cords,
                                                                 std::vector< std::vector< double > > nodes_on_element_boundary_face_line,
                                                                 //------- direction of tangential vector -------
                                                                 unsigned int direction_of_bndry_bndry_integration_line,
@@ -154,7 +153,6 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
                                                             //-----element face center
                                                             std::vector<double> element_face_center_3d,
                                                             //-----vector & matrix -------
-//                                                             std::vector<std::vector< double > > face_index_direction_extreme_bdry_region,
                                                             std::vector< std::vector< double > > nodes_on_element_boundary_face_line,
                                                             //------- tangent vector -------
                                                             const std::vector< unsigned int> tangential_face_index_vector,
@@ -203,7 +201,6 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
                                                                              analitical_integral_extreme_cords);
 
                 c = - analitical_integral_extreme_cords[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ] ;
-//                 c = calculation_c_parameter( analitical_integral_extreme_cords[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ] );
 
             }
             else if( vector_components_are_equal<double>( nodes_on_element_boundary_face_line[ tangential_face_index_vector[  second_tang_dir ] ] ) ) {
@@ -223,7 +220,6 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
                                                                              element_face_center_3d,
                                                                              //-----vector & matrix -------
                                                                              face_index_direction_extreme_bdry_region,
-//                                                                              face_index_bndry_region_vertex_cords,,
                                                                              nodes_on_element_boundary_face_line,
                                                                              //------- direction of tangential vector -------
                                                                              direction_of_bndry_bndry_integration_line,
@@ -236,18 +232,10 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
                                                                              analitical_integral_extreme_cords);
 
                 c = - analitical_integral_extreme_cords[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ] ;
-//                 c = calculation_c_parameter( analitical_integral_extreme_cords[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ] );
             }
       }
 //************************* calculus of parameter for analitical solution of mixed integral - END *************************
 
-
-//************************* c parameter calculation - BEGIN *************************
-       double calculation_c_parameter(double first_nodes_of_bdryt_bdry_component_in_normal_direction_to_straigh_line){    //the normal components (respect the integration line) of the points along the line are equal !!!!!!
-           if(first_nodes_of_bdryt_bdry_component_in_normal_direction_to_straigh_line > 0.25) { return - 0.75;}
-           else { return  - 0.25;}
-       }
-//************************* c parameter calculation - END *************************
 
 
  } //end namespace ctrl

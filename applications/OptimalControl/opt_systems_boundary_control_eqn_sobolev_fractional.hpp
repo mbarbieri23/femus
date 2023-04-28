@@ -38,7 +38,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
 
   static void unbounded_integral_over_exterior_of_boundary_control_face(
 //
-//                       int & count,
+                      int & count,
 //
                       const unsigned unbounded,
                       const unsigned int analitical_solution,
@@ -87,7 +87,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                      ) {
 //       count++;
       
-     
+
   const unsigned int n_components_ctrl = nDof_vol_iel.size();
   
   unsigned nDof_iel_vec = 0;
@@ -270,24 +270,23 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
             unsigned int normal_dir =  LIST_OF_CTRL_FACES :: normal_direction_to_Gamma_control( j_element_face_index);
             //normal direction - END
 
-//               std::vector<std::vector< double > > face_index_direction_extreme_bdry_region = LIST_OF_CTRL_FACES::get_extreme_for_each_direction< LIST_OF_CTRL_FACES >( i_element_face_index, global_dirs_for_atan, normal_dir);
 
+             //*********************************************************************************
+             //======================== ANALITICAL SOLUTION - BEGIN ========================
+             //*********************************************************************************
+              if( analitical_solution == 1 && check_if_same_elem( TEST_JEL_SINGLE_FOR_LOOP , jel) ){
 
+              count++;
 
                for(unsigned e_bdry_bdry = 0; e_bdry_bdry < jel_n_faces_faces; e_bdry_bdry++) {  //loop over face of face
 
 
               unsigned jel_n_dofs_bdry_bdry =  msh->el->GetNFACENODES(jel_geom_type_face, e_bdry_bdry, solType_coords); //number of nodes on face of face
 
-
-
-              //======================== ANALITICAL SOLUTION - BEGIN ========================
-              if( analitical_solution == 1 && check_if_same_elem( TEST_JEL_SINGLE_FOR_LOOP , jel) ){
-
-
               //------------------------------------------------------------------------------------
               //****************** node at element boundary face line 3 X 3 - BEGIN ******************
               //------------------------------------------------------------------------------------
+
               //------------ node at element boundary face line declaration - BEGIN ------------
               vector< vector< double > > nodes_on_element_boundary_face_line(dim);    // A matrix holding the face coordinates rowwise.
               for(int k = 0; k < dim; k++) {
@@ -306,6 +305,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                    }
                }
               //------------ node at element boundary face line built - END ------------
+
               //------------------------------------------------------------------------------------
               //****************** node at element boundary face line 3 X 3 - END ******************
               //------------------------------------------------------------------------------------
@@ -320,10 +320,10 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               //---------- coefficent declaration - END ----------
 
               //----------------- matrix preparation - BEGIN -----------------
-              std::vector<std::vector<double>> cords_of_analitical_integer_extreme(dim);
-              for(unsigned f = 0; f <  cords_of_analitical_integer_extreme.size(); f++) {
-                       cords_of_analitical_integer_extreme[f].resize(dim_bdry);
-                   }
+              std::vector<std::vector<double>> cords_of_analitical_integer_extreme(dim, std::vector<double> (dim_bdry));
+//               for(unsigned f = 0; f <  cords_of_analitical_integer_extreme.size(); f++) {
+//                        cords_of_analitical_integer_extreme[f].resize(dim_bdry);
+//                    }
               //----------------- matrix preparation - END -----------------
 
               sp = 2. * s_frac;
@@ -333,7 +333,6 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                                                                                      //-----element face center
                                                                                      element_face_center_3d,
                                                                                      //-----vector & matrix -------
-//                                                                                      face_index_direction_extreme_bdry_region,
                                                                                      nodes_on_element_boundary_face_line,
                                                                                      //------- tangent vector -------
                                                                                      global_dirs_for_atan,
@@ -347,6 +346,34 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               //****************** preparation coefficent and extreme for analitical solution - END ******************
               //------------------------------------------------------------------------------------
 
+
+
+              //------------------------------------------------------------------------------------
+              //****************** delta coords coarse - BEGIN ******************
+              //------------------------------------------------------------------------------------
+
+              //------------ delta coords coarse resize 3 X 3 - BEGIN ------------
+
+              vector  < vector  <  double> > radius_centered_at_x_qp_of_iface_bdry_bdry(dim);    // A matrix holding the face coordinates rowwise.
+              for(int dim = 0; dim < radius_centered_at_x_qp_of_iface_bdry_bdry.size(); dim++) {
+                radius_centered_at_x_qp_of_iface_bdry_bdry[dim].resize(cords_of_analitical_integer_extreme[dim].size());
+              }
+              //------------ delta coords coarse resize 3 X 3 - END ------------
+
+              //------------ delta coords coarse computation - BEGIN ------------
+
+                for(int dim = 0; dim <cords_of_analitical_integer_extreme.size() ; dim++) {
+                    for(int pt = 0; pt <cords_of_analitical_integer_extreme[dim].size() ; pt++) {
+                  radius_centered_at_x_qp_of_iface_bdry_bdry[dim][pt] = cords_of_analitical_integer_extreme[dim][pt] - x_qp_of_iface[dim];
+                }
+              }
+              //------------ delta coords coarse computation - END ------------
+
+              //------------------------------------------------------------------------------------
+              //****************** delta coords coarse - END ******************
+              //------------------------------------------------------------------------------------
+
+
               //------------------------------------------------------------------------------------
               //************ theta's - BEGIN ************
               //------------------------------------------------------------------------------------
@@ -357,10 +384,10 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               //--------- theta declaration - END ---------
 
               //--------- theta's calculus - BEGIN ---------
-                for(unsigned p = 0; p < theta_first_and_last_radius.size(); p++) {
-                   theta_first_and_last_radius[p] = atan2(cords_of_analitical_integer_extreme [ global_dirs_for_atan[global_dir_second] ][/*n + */p],
-                                                          cords_of_analitical_integer_extreme [ global_dirs_for_atan[global_dir_first] ][/*n +*/ p]);
-                              }
+                for(unsigned pt = 0; pt < theta_first_and_last_radius.size(); pt++) {
+                   theta_first_and_last_radius[pt] = atan2(radius_centered_at_x_qp_of_iface_bdry_bdry[ global_dirs_for_atan[global_dir_second] ][pt],
+                                                           radius_centered_at_x_qp_of_iface_bdry_bdry[ global_dirs_for_atan[global_dir_first ] ][pt]);
+                }
 
 // // //                 double delta_theta = 0.;
 // // //                 if(theta_first_and_last_radius[1] < theta_first_and_last_radius[0]) delta_theta = std::min(theta_first_and_last_radius[0] - theta_first_and_last_radius[1], 2. * M_PI + theta_first_and_last_radius[1] - theta_first_and_last_radius[0]);
@@ -375,19 +402,29 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
 
               // integral - BEGIN -----
               mixed_denominator_numerical += d * (
-              a * ( sin( theta_first_and_last_radius[ theta_of_radius_second ] ) - sin( theta_first_and_last_radius[ theta_of_radius_first] ) ) -
-              b * ( cos( theta_first_and_last_radius[ theta_of_radius_second ] ) -cos( theta_first_and_last_radius[ theta_of_radius_first] ) ) );
+              a * ( sin(theta_first_and_last_radius[ theta_of_radius_second ]) - sin(theta_first_and_last_radius[ theta_of_radius_first]) ) -
+              b * ( cos(theta_first_and_last_radius[ theta_of_radius_second ]) -cos(theta_first_and_last_radius[ theta_of_radius_first]) ) );
               // integral - END -----
 
+            }  //end face of face loop
               } //end if ANALITICAL_SOLUTION
+              //*********************************************************************************
               //======================== ANALITICAL SOLUTION - END ========================
+              //*********************************************************************************
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////
 
+              //*********************************************************************************
               //======================== NUMERICAL SOLUTION - BEGIN ========================
+              //*********************************************************************************
               else{
 
+
+               for(unsigned e_bdry_bdry = 0; e_bdry_bdry < jel_n_faces_faces; e_bdry_bdry++) {  //loop over face of face
+
+
+              unsigned jel_n_dofs_bdry_bdry =  msh->el->GetNFACENODES(jel_geom_type_face, e_bdry_bdry, solType_coords); //number of nodes on face of face
 
               // look for boundary of boundary faces - BEGIN
                   std::vector < int > nodes_face_face_flags(jel_n_dofs_bdry_bdry, 0);
@@ -412,7 +449,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               if(is_face_bdry_bdry) {
 
 
-              //****************** delta coords coarse resize - BEGIN ******************
+              //****************** delta coords coarse - BEGIN ******************
 
                  //------------ delta coords coarse resize 3 X 3 - BEGIN ------------
               vector  < vector  <  double> > radius_centered_at_x_qp_of_iface_bdry_bdry(dim);    // A matrix holding the face coordinates rowwise.
@@ -435,7 +472,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               }
                  //------------ delta coords coarse computation - END ------------
 
-              //****************** delta coords coarse resize - END ******************
+              //****************** delta coords coarse - END ******************
 
 
               // delta coords - refinement - BEGIN -----
@@ -510,16 +547,18 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
 
 
               } // end if(is_face_bdry_bdry)
+              //*********************************************************************************
               //======================== NUMERICAL SOLUTION - END ========================
+              //*********************************************************************************
 
 
 
 
 
 
+            }  //end face of face loop
               } //end else ANALITICAL_SOLUTION
               
-            }  //end face of face loop
             
             
             /// @todo ONLY DIFFERENCES: the mixed_denominator is numerical, and so also the corresponding Res and Jac. It could be done with a single function
@@ -713,7 +752,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                         //-----------
                         const bool print_algebra_local
                        ) {
-
+int count = 0 ;
 
 // --- Fractional - BEGIN
 const double C_ns =    compute_C_ns(dim_bdry, s_frac, use_Cns);  
@@ -1550,7 +1589,7 @@ unsigned nDof_iel_vec = 0;
 
                unbounded_integral_over_exterior_of_boundary_control_face(
 //
-//                               count_unbounded,
+                              count,
 //
                               unbounded,
                               analitical_solution,
@@ -1742,7 +1781,7 @@ unsigned nDof_iel_vec = 0;
 
               unbounded_integral_over_exterior_of_boundary_control_face(
                   //
-//                   count_unbounded,
+                  count,
                   //
                               unbounded,
                               analitical_solution,
@@ -1806,7 +1845,7 @@ unsigned nDof_iel_vec = 0;
             
 //------------ qp_of_iface closing - BEGIN  ---------        
       }   //end qp_of_iface
-       count_bounded++;
+//        count_bounded++;
 //        count_unbounded++;
 
 //------------ qp_of_iface closing - END ---------        
@@ -1933,6 +1972,14 @@ unsigned nDof_iel_vec = 0;
                   
        std::cout << "SQUARE ROOOOOOOOTTTTTTTTTTTTTTTTTTTT AFTER" << std::endl;
        
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout <<  "&&&&&& COUNT ELEMENT FOR ANALITICAL 3D SOLUTION &&&&&&&&&&    " <<count<< std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
+
+
+
 // integral - END ************
 
     
