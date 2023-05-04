@@ -460,7 +460,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
       MPI_Bcast(&l2GMap2[0], nDof2, MPI_UNSIGNED, kproc, MPI_COMM_WORLD);
       // ******************************************************************
 
-      // local storage of coordinates  #######################################
+      // local storage of coordinates BEGIN  #######################################
       if(iproc == kproc) {
         for(unsigned j = 0; j < nDofx2; j++) {
           unsigned xDof  = msh->GetSolutionDof(j, jel, xType);  // global to global mapping between coordinates node and coordinate dof
@@ -477,7 +477,10 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
         MPI_Bcast(& x2[k][0], nDofx2, MPI_DOUBLE, kproc, MPI_COMM_WORLD);
       }
       MPI_Bcast(& solu2[0], nDof2, MPI_DOUBLE, kproc, MPI_COMM_WORLD);
-      // ######################################################################
+      //  local storage of coordinates END ######################################################################
+
+
+
 
       // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
       if(iproc == kproc) {
@@ -499,7 +502,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
       vector < vector <double> > phi2(jgNumber);  // local test function
       std::vector< double > solY(jgNumber, 0.);
 
-// ---- jg stored computations ---- 
+// ---- jg stored computations BEGIN ----
 // you store all that happens at the jg points so that it is computed only once      
       for(unsigned jg = 0; jg < jgNumber; jg++) {
 
@@ -522,7 +525,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
           }
         }
       }
-// ---- jg stored computations ----    
+// ---- jg stored computations END ----
 
 
 
@@ -534,6 +537,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
       if(iproc == kproc) {
         for(unsigned jface = 0; jface < msh->GetElementFaceNumber(jel); jface++) {
           int faceIndex = el->GetBoundaryIndex(jel, jface);
+
 //           faceDofs[jface] = msh->GetElementFaceDofNumber(jel, jface, solType);
 //           inode[jface].resize(faceDofs[jface]);
 // //       inode[jface].assign(faceDofs[jface], 0);
@@ -541,6 +545,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
 //             inode[jface][i] = msh->GetLocalFaceVertexIndex(jel, jface, i);    // face-to-element local node mapping.
 //           }
 //           MPI_Bcast(& inode[jface][0], faceDofs[jface], MPI_UNSIGNED, kproc, MPI_COMM_WORLD);
+
 
           // look for boundary faces
           if(faceIndex >= 1) {
@@ -712,7 +717,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
             }
 //============  Laplacian assembly - END ==================
 
-//============  Mixed integral - Analytical ((Rn-Omega) x Omega) assembly (based on the analytic result of integrals) ==================
+//============  Mixed integral - Analytical ((Rn-Omega) x Omega) assembly (based on the analytic result of integrals) BEGIN ==================
 //             if(dim == 1 && UNBOUNDED == 1) {
 //               double ex_1 = EX_1;
 //               double ex_2 = EX_2;
@@ -772,7 +777,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
 //                 Res_local[ i ] += (C_ns / 2.) * check_limits * OP_Hhalf * weight1 * phi1[i] * solX * mixed_term;
 //               }
 //             }
-//============  Mixed integral - Analytical ((Rn-Omega) x Omega) assembly (based on the analytic result of integrals) ==================
+//============  Mixed integral - Analytical ((Rn-Omega) x Omega) assembly (based on the analytic result of integrals) END ==================
 
 //============ Adaptive quadrature for iel == jel - BEGIN ==================
             if(OP_Hhalf != 0) {
@@ -848,7 +853,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
 // ********* UNBOUNDED PART - BEGIN ***************
                 if(ig == 0) { ///@todo is there a way to put this outside of the ig loop?
               if(UNBOUNDED == 1) {
-//============ Mixed integral 1D - Analytical ==================
+//============ Mixed integral 1D - Analytical BEGIN ==================
                 if(dim == 1) {
                   double ex_1 = EX_1;
                   double ex_2 = EX_2;
@@ -867,8 +872,8 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
                                  Res_local[ i ] += - (C_ns / 2.) * check_limits * OP_Hhalf * weight3 * phi3[i] * solY3 * mixed_term;
                   }
                 }
-//============ Mixed integral 1D - Analytical ==================
-//============ Mixed Integral 2D - Numerical ==================
+//============ Mixed integral 1D - Analytical END ==================
+//============ Mixed Integral 2D - Numerical BEGIN ==================
                 else if (dim == 2) {
                   double mixed_term1 = 0;
 //     for(int kel = msh->_elementOffset[iproc]; kel < msh->_elementOffset[iproc + 1]; kel++) {
@@ -931,7 +936,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
                                  Res_local_mixed_num[ i ] += - (C_ns / 2.) * check_limits * OP_Hhalf * weight3 * phi3[i] * solX * mixed_term1;
                   }
                 }
-//============ Mixed Integral 2D - Numerical ==================
+//============ Mixed Integral 2D - Numerical END ==================
              } //end unbounded
             } //end ig == 0
 // ********* UNBOUNDED PART - END ***************
@@ -951,7 +956,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
             
 // ********* UNBOUNDED PART - BEGIN ***************
           if(UNBOUNDED == 1 /*&& iel == jel*/) {
-    //============  Mixed integral 1D - Analytical  ==================
+    //============  Mixed integral 1D - Analytical BEGIN ==================
             if(dim == 1 && iel == jel) {
               double ex_1 = EX_1;
               double ex_2 = EX_2;
@@ -970,9 +975,9 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
                              Res_local[ i ] += - (C_ns / 2.) * check_limits * (1. / s_frac) * OP_Hhalf * weight1 * phi1[i] * solX * mixed_term;
               }
             }
-    //============  Mixed integral 1D - Analytical ==================        
+    //============  Mixed integral 1D - Analytical END ==================
     
-    //============ Mixed Integral 2D - Numerical ==================      
+    //============ Mixed Integral 2D - Numerical BEGIN ==================
             else if( dim == 2 ) {
 
             double mixed_term1 = 0;
@@ -1036,7 +1041,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
               Res_local_mixed_num[ i ] += - (C_ns / 2.) * check_limits * OP_Hhalf * weight1 * phi1[i] * solX * mixed_term1;
             }
            }
-//============ Mixed Integral - Numerical ==================
+//============ Mixed Integral - Numerical END ==================
          }
 // ********* UNBOUNDED PART - END ***************
 
@@ -1081,6 +1086,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
 //          assemble_jacobian<double,double>::print_element_residual(iel, Res, Sol_n_el_dofs_Mat_vol, 10, 5);
 //          assemble_jacobian<double,double>::print_element_jacobian(iel, KK_local_mixed_num, Sol_n_el_dofs_Mat_vol2, 10, 10);
 
+  // ***************** BEGIN ASSEMBLY *******************
         if(iel == jel) {
           KK->add_matrix_blocked(KK_local, l2GMap1, l2GMap1);
           RES->add_vector_blocked(Res_local, l2GMap1);

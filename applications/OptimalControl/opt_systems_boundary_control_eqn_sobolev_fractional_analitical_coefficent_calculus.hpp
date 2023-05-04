@@ -22,7 +22,9 @@ namespace ctrl {
 
 //************************* get_extreme_for_each_direction - BEGIN *************************
            template < class LIST_OF_CTRL_FACES >
-           std::vector<std::vector< double > > get_extreme_for_each_direction( unsigned int face_index, const std::vector< unsigned int> tangential_vector, unsigned int normal_dir){
+           std::vector<std::vector< double > > get_extreme_for_each_direction( unsigned int face_index,
+                                                                               const std::vector< unsigned int> tangential_vector,
+                                                                               unsigned int normal_dir){
 
                unsigned int position = get_position_on_list_faces_clas< LIST_OF_CTRL_FACES >(face_index);
                unsigned int dim = LIST_OF_CTRL_FACES :: _num_of_tang_components_per_face + 1;
@@ -32,10 +34,10 @@ namespace ctrl {
                bool is_face_on_maximal_coordinate = LIST_OF_CTRL_FACES ::is_face_on_maximal_coordinate_by_tangential_component( tangential_vector );
 
                //************** declaration - BEGIN **************
-               std::vector<std::vector< double > > face_index_extreme_of_contrl_region(dim);
-               for(int dir = 0; dir < dim; dir++){
-                   face_index_extreme_of_contrl_region[dir].resize(number_of_extreme_for_tng_direction,0);
-               }
+               std::vector< std::vector< double > > face_index_extreme_of_contrl_region( dim, std::vector< double >(number_of_extreme_for_tng_direction) );
+//                for(int dir = 0; dir < dim; dir++){
+//                    face_index_extreme_of_contrl_region[dir].resize(number_of_extreme_for_tng_direction,0);
+//                }
                //************** declaration - END **************
 
                //************** built - BEGIN **************
@@ -83,6 +85,7 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
 }
 //************************* give a vector return if the vector has the component decreasing along specific direction - END *************************
 
+
 //************************* integration_extreme_cords 3 x 3 - BEGIN *************************
      std::vector<std::vector<double>> integration_extreme_cords(unsigned int face_index,
                                                                 //const unsigned dim,
@@ -105,28 +108,34 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
 
     constexpr unsigned first_node_along_element_face_line = 0;
 
+    //----------------- filling extreme along normal tangential direction - BEGIN -----------------
     for (int p = 0; p < cords_of_analitical_integer_extreme[normal_dir].size(); p++){
 
-
-
         if(nodes_on_element_boundary_face_line[normal_tangential_direction_to_bndry_bndry_integration_line][first_node_along_element_face_line] > element_face_center_3d[normal_tangential_direction_to_bndry_bndry_integration_line] ){
+
             std::vector<double>::iterator result = std::max_element( face_index_extreme_3d_along_direction[normal_tangential_direction_to_bndry_bndry_integration_line].begin(),
-                               face_index_extreme_3d_along_direction[normal_tangential_direction_to_bndry_bndry_integration_line].end()   );
+                                                                     face_index_extreme_3d_along_direction[normal_tangential_direction_to_bndry_bndry_integration_line].end()   );
+
             cords_of_analitical_integer_extreme[normal_tangential_direction_to_bndry_bndry_integration_line][p] = *result;
         }
         else{
+
             std::vector<double>::iterator result = std::min_element( face_index_extreme_3d_along_direction[normal_tangential_direction_to_bndry_bndry_integration_line].begin(),
-                               face_index_extreme_3d_along_direction[normal_tangential_direction_to_bndry_bndry_integration_line].end()    );
+                                                                     face_index_extreme_3d_along_direction[normal_tangential_direction_to_bndry_bndry_integration_line].end()    );
 
             cords_of_analitical_integer_extreme[normal_tangential_direction_to_bndry_bndry_integration_line][p] = *result;
         }
 
     }
+    //----------------- filling extreme along normal tangential direction - END -------------------
 
-
+    //----------------- filling normal direction -----------------
     cords_of_analitical_integer_extreme[normal_dir] = face_index_extreme_3d_along_direction[normal_dir];
-    cords_of_analitical_integer_extreme[direction_of_bndry_bndry_integration_line] = face_index_extreme_3d_along_direction[direction_of_bndry_bndry_integration_line];
+    //------------------------------------------------------------
 
+    //----------------- filling integration line direction -----------------
+    cords_of_analitical_integer_extreme[direction_of_bndry_bndry_integration_line] = face_index_extreme_3d_along_direction[direction_of_bndry_bndry_integration_line];
+    //----------------------------------------------------------------------
 
     //----------------- reverse matrix - BEGIN -----------------
     bool is_integration_extreme_matrix_decreasing = is_vector_oriented_with_cords_decreasing_along_specific_direction(cords_of_analitical_integer_extreme, direction_of_bndry_bndry_integration_line);
@@ -137,7 +146,7 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
              std::reverse( cords_of_analitical_integer_extreme[dir].begin(), cords_of_analitical_integer_extreme[dir].end() );
             }
     }
-    //----------------- reverse matrix - END -----------------
+    //----------------- reverse matrix - END -------------------
 
     return cords_of_analitical_integer_extreme;
 
@@ -169,7 +178,9 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
 
                 bool are_nodes_coordinates_decreasing_along_integration_directin = false;
 
-                std::vector<std::vector< double > > face_index_direction_extreme_bdry_region = get_extreme_for_each_direction< LIST_OF_CTRL_FACES >( face_index, tangential_face_index_vector, normal_dir);
+                std::vector<std::vector< double > > face_index_direction_extreme_bdry_region = get_extreme_for_each_direction< LIST_OF_CTRL_FACES >( face_index,
+                                                                                                                                                     tangential_face_index_vector,
+                                                                                                                                                     normal_dir);
 
 
             if( vector_components_are_equal<double>( nodes_on_element_boundary_face_line[ tangential_face_index_vector[ first_tang_dir ] ] ) ) {
@@ -235,6 +246,45 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
             }
       }
 //************************* calculus of parameter for analitical solution of mixed integral - END *************************
+
+
+//*************************  parameter for analitical solution of mixed integral - BEGIN *************************
+      void coefficent_of_analitical_solution(const std::vector< std::vector< double > > nodes_on_element_boundary_face_line,
+                                             //------- tangent vector -------
+                                             const std::vector< unsigned int> tangential_face_index_vector,
+                                             //------- output -------
+                                             double& a, double& b, double& c){
+
+                constexpr unsigned first_tang_dir = 0;
+                constexpr unsigned second_tang_dir = 1;
+
+                constexpr unsigned first_node_along_element_face_line = 0;
+
+
+            if( vector_components_are_equal<double>( nodes_on_element_boundary_face_line[ tangential_face_index_vector[ first_tang_dir ] ] ) ) {
+
+                unsigned int normal_tangential_direction_to_bndry_bndry_integration_line = tangential_face_index_vector[  first_tang_dir ];// normal is the components (respect the integration line) where points  are equal !!!!!!
+                unsigned int direction_of_bndry_bndry_integration_line = tangential_face_index_vector[  second_tang_dir ];
+
+                a = 1.;
+                b = 0.;
+                c = - nodes_on_element_boundary_face_line[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ] ;
+
+            }
+            else if( vector_components_are_equal<double>( nodes_on_element_boundary_face_line[ tangential_face_index_vector[  second_tang_dir ] ] ) ) {
+
+                unsigned int normal_tangential_direction_to_bndry_bndry_integration_line = tangential_face_index_vector[  second_tang_dir ];
+                unsigned int direction_of_bndry_bndry_integration_line = tangential_face_index_vector[  first_tang_dir ];
+
+                a = 0.;
+                b = 1.;
+                c = - nodes_on_element_boundary_face_line[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ] ;
+            }
+      }
+//*************************  parameter for analitical solution of mixed integral - END *************************
+
+
+
 
 
 
