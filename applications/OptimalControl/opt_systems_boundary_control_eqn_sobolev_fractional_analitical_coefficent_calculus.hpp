@@ -8,7 +8,6 @@ namespace femus {
 
 namespace ctrl {
 
-
 ////////LIST_OF_CTRL_FACES stuff - BEGIN
 //************************* get_position_on_list_faces_clas - BEGIN *************************
            template < class LIST_OF_CTRL_FACES >
@@ -63,6 +62,12 @@ namespace ctrl {
 //************************* get_extreme_for_each_direction - END *************************
 ////////LIST_OF_CTRL_FACES stuff - END
 
+
+//*****************************************************************************************************************************************
+//*****************************************************************************************************************************************
+//********************************************* PREVIOUS FUNCTION - BEGIN *****************************************************************
+//*****************************************************************************************************************************************
+//*****************************************************************************************************************************************
 
 //************************* give a vector return tur if the vector components are the same , false if not - BEGIN *************************
        template < class component_type >
@@ -247,9 +252,17 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
       }
 //************************* calculus of parameter for analitical solution of mixed integral - END *************************
 
+//*****************************************************************************************************************************************
+//*****************************************************************************************************************************************
+//********************************************* PREVIOUS FUNCTION - END *****************************************************************
+//*****************************************************************************************************************************************
+//*****************************************************************************************************************************************
+
 
 //*************************  parameter for analitical solution of mixed integral - BEGIN *************************
       void coefficent_of_analitical_solution(const std::vector< std::vector< double > > nodes_on_element_boundary_face_line,
+                                             //------- i_face qd_point ----------
+                                             const std::vector< double> center_of_polar_coords,
                                              //------- tangent vector -------
                                              const std::vector< unsigned int> tangential_face_index_vector,
                                              //------- output -------
@@ -268,7 +281,9 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
 
                 a = 1.;
                 b = 0.;
-                c = - nodes_on_element_boundary_face_line[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ] ;
+                c = - ( nodes_on_element_boundary_face_line[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ]
+                        -center_of_polar_coords[ normal_tangential_direction_to_bndry_bndry_integration_line ]
+                       );
 
             }
             else if( vector_components_are_equal<double>( nodes_on_element_boundary_face_line[ tangential_face_index_vector[  second_tang_dir ] ] ) ) {
@@ -278,7 +293,9 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
 
                 a = 0.;
                 b = 1.;
-                c = - nodes_on_element_boundary_face_line[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ] ;
+                c = - ( nodes_on_element_boundary_face_line[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ]
+                         -center_of_polar_coords[ normal_tangential_direction_to_bndry_bndry_integration_line ]
+                       );
             }
       }
 //*************************  parameter for analitical solution of mixed integral - END *************************

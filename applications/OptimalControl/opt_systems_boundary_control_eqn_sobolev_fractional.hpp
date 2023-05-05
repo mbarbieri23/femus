@@ -346,8 +346,8 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
              //*********************************************************************************
              //======================== ANALITICAL SOLUTION - BEGIN ========================
              //*********************************************************************************
-              if( analitical_solution == 1 /*&& check_if_same_elem( TEST_JEL_SINGLE_FOR_LOOP , jel)*/ ){
-              count++;
+              if( analitical_solution == 1 /*&&nodes_along_line_integration[]*//*&& check_if_same_elem( TEST_JEL_SINGLE_FOR_LOOP , jel)*/ ){
+//               count++;
 
               //--------------------------------------------------------------------------------------------------------
               //****************** preparation coefficent and extreme for analitical solution - BEGIN ******************
@@ -358,11 +358,14 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               sp = 2. * s_frac;
 //               coefficent_of_analitical_solution< LIST_OF_CTRL_FACES >(nodes_along_line_integration,
               coefficent_of_analitical_solution(nodes_along_line_integration,
+                                                //------- i_face qd_point ----------
+                                                x_qp_of_iface,
                                                 //------- tangent vector -------
                                                 global_dirs_for_atan,
                                                 //------- output -------
                                                 a, b, c);
-              d = 1 / ( sp * pow( - c, sp) );
+              double abs_c = abs(- c);
+              d = 1 / ( sp * pow( abs_c, sp) );
               //------------------------------------------------------------------------------------------------------
               //****************** preparation coefficent and extreme for analitical solution - END ******************
               //------------------------------------------------------------------------------------------------------
@@ -371,7 +374,6 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               //------------------------------------------------------------------------------------
               //************ theta's - BEGIN ************
               //------------------------------------------------------------------------------------
-
               //--------- theta declaration - BEGIN ---------
               std::vector< double > theta_first_and_last_radius(2);
               constexpr unsigned theta_of_radius_first = 0;
@@ -384,24 +386,69 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                                                            radius_centered_at_x_qp_of_iface_bdry_bdry[ global_dirs_for_atan[global_dir_first ] ][pt]);
                 }
 
-// // //                 double delta_theta = 0.;
-// // //                 if(theta_first_and_last_radius[1] < theta_first_and_last_radius[0]) delta_theta = std::min(theta_first_and_last_radius[0] - theta_first_and_last_radius[1], 2. * M_PI + theta_first_and_last_radius[1] - theta_first_and_last_radius[0]);
-// // //                 else delta_theta = std::min(theta_first_and_last_radius[1] - theta_first_and_last_radius[0], 2. * M_PI + theta_first_and_last_radius[0] - theta_first_and_last_radius[1]);
-                if(theta_first_and_last_radius[ theta_of_radius_second ] < theta_first_and_last_radius[ theta_of_radius_first ]) {
-                    theta_first_and_last_radius[theta_of_radius_second ] += 2. * M_PI;
-                }
+//                 if(theta_first_and_last_radius[ theta_of_radius_second ] < theta_first_and_last_radius[ theta_of_radius_first ]) {
+//                     theta_first_and_last_radius[theta_of_radius_second ] += 2. * M_PI;
+//                 }
               //--------- theta's calculus - END ---------
-
               //------------------------------------------------------------------------------------
               //************ theta's - END ************
               //------------------------------------------------------------------------------------
 
               // integral - BEGIN -----
+
+                           if(   (x_qp_of_iface[1]>0.741321 -1e-05 && x_qp_of_iface[1]<0.741321 +1e-05 )
+                              && (x_qp_of_iface[2]>0.616321 -1e-05 && x_qp_of_iface[2]<0.616321 +1e-05 )
+                              && (nodes_along_line_integration[1][0]>0.75-1e-05 && nodes_along_line_integration[1][0]<0.75+1e-05 )
+                              && (nodes_along_line_integration[1][1]>0.75-1e-05 && nodes_along_line_integration[1][1]<0.75+1e-05 )
+                              && (nodes_along_line_integration[1][2]>0.75-1e-05 && nodes_along_line_integration[1][2]<0.75+1e-05 )
+                              && (nodes_along_line_integration[2][0]>x_qp_of_iface[2] )
+                              && (nodes_along_line_integration[2][1]>x_qp_of_iface[2])
+                              && (nodes_along_line_integration[2][2]>x_qp_of_iface[2])
+                              ){
+count++;
               mixed_denominator_numerical += d * (
               a * ( sin(theta_first_and_last_radius[ theta_of_radius_second ]) - sin(theta_first_and_last_radius[ theta_of_radius_first]) ) -
               b * ( cos(theta_first_and_last_radius[ theta_of_radius_second ]) - cos(theta_first_and_last_radius[ theta_of_radius_first]) ) );
-              // integral - END -----
 
+  std::cout <<  "&&&&&& ANALYTICAL &&&&&&&&&&    "  << std::endl;
+  std::cout <<  "&------------------------------------------------------------------------&    "  << std::endl;
+  std::cout <<  "&&&&&& QUADRATURE POINT X &&&&&&&&&&    "  ;
+  std::cout <<x_qp_of_iface[1]<<" " ;
+  std::cout <<x_qp_of_iface[2]<<" ";std::cout << std::endl;
+  std::cout <<  "&&&&&& first node y,z &&&&&&&&&&    "  ;
+  std::cout <<nodes_along_line_integration[1][0]<<" ";
+  std::cout <<nodes_along_line_integration[2][0]<<" ";std::cout << std::endl;
+  std::cout <<  "&&&&&& second node y,z &&&&&&&&&&    "  ;
+  std::cout <<nodes_along_line_integration[1][1]<<" ";
+  std::cout <<nodes_along_line_integration[2][1]<<" ";std::cout << std::endl;
+  std::cout <<  "&------------------------------------------------------------------------&    "  << std::endl;
+  std::cout <<  "&&&&&& radus 1 &&&&&&&&&&    "  ;
+  std::cout <<radius_centered_at_x_qp_of_iface_bdry_bdry[1][0]<<" ";
+  std::cout <<radius_centered_at_x_qp_of_iface_bdry_bdry[2][0]<<" ";
+  std::cout <<  "&&&&&& ratio z/y 1 &&&&&&&&&&    "  ;
+  std::cout <<radius_centered_at_x_qp_of_iface_bdry_bdry[2][0]/radius_centered_at_x_qp_of_iface_bdry_bdry[1][0]<<" ";std::cout << std::endl;
+  std::cout <<  "&&&&&& radus 2 &&&&&&&&&&    "  ;
+  std::cout <<radius_centered_at_x_qp_of_iface_bdry_bdry[1][1]<<" ";
+  std::cout <<radius_centered_at_x_qp_of_iface_bdry_bdry[2][1]<<" ";
+  std::cout <<  "&&&&&& ratio z/y 1 &&&&&&&&&&    "  ;
+  std::cout <<radius_centered_at_x_qp_of_iface_bdry_bdry[2][1]/radius_centered_at_x_qp_of_iface_bdry_bdry[1][1]<<" ";std::cout << std::endl;
+  std::cout <<  "&------------------------------------------------------------------------&    "  << std::endl;
+  std::cout <<  "&&&&&& theta_first_and_last_radius &&&&&&&&&&    "  ;
+  std::cout <<theta_first_and_last_radius[0]<<" ";
+  std::cout <<theta_first_and_last_radius[1]<<" ";std::cout << std::endl;
+  std::cout <<  "&------------------------------------------------------------------------&    "  << std::endl;
+  std::cout <<  "&&&&&& integral &&&&&&&&&&    "  ;
+  std::cout <<mixed_denominator_numerical<<std::endl;
+  std::cout <<  "&------------------------------------------------------------------------&    "  << std::endl;
+  std::cout <<  "a = "<<a<<std::endl;
+  std::cout <<  "b = "<<b<<std::endl;
+  std::cout <<  "c = "<<c<<std::endl;
+  std::cout <<  "d = "<<d<<std::endl;
+
+
+
+            }
+              // integral - END -----
 //             }  //end face of face loop
               } //end if ANALITICAL_SOLUTION
               //*********************************************************************************
@@ -480,9 +527,55 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
 
                 // integral - BEGIN -----
                 /*numerical solution*/
-                mixed_denominator_numerical += pow(dist, -  2. * s_frac)  * delta_theta  * (1. / s_frac);
-               // integral - END -----
 
+
+                           if(   (x_qp_of_iface[1]>0.741321 -1e-05 && x_qp_of_iface[1]<0.741321 +1e-05 )
+                              && (x_qp_of_iface[2]>0.616321 -1e-05 && x_qp_of_iface[2]<0.616321 +1e-05 )
+                              && (nodes_along_line_integration[1][0]>0.75-1e-05 && nodes_along_line_integration[1][0]<0.75+1e-05 )
+                              && (nodes_along_line_integration[1][1]>0.75-1e-05 && nodes_along_line_integration[1][1]<0.75+1e-05 )
+                              && (nodes_along_line_integration[1][2]>0.75-1e-05 && nodes_along_line_integration[1][2]<0.75+1e-05 )
+                              && (nodes_along_line_integration[2][0]>x_qp_of_iface[2] )
+                              && (nodes_along_line_integration[2][1]>x_qp_of_iface[2])
+                              && (nodes_along_line_integration[2][2]>x_qp_of_iface[2])
+                              ){
+
+                mixed_denominator_numerical += pow(dist, -  2. * s_frac)  * delta_theta  * (1. / s_frac);
+
+   std::cout <<  "&&&&&& NUMERICAL &&&&&&&&&&    "  << std::endl;
+   std::cout <<  "&------------------------------------------------------------------------&    "  << std::endl;
+  std::cout <<  "&&&&&& QUADRATURE POINT X &&&&&&&&&&    "  ;
+  std::cout <<x_qp_of_iface[1]<<" " ;
+  std::cout <<x_qp_of_iface[2]<<" ";std::cout << std::endl;
+  std::cout <<  "&&&&&& first node y,z &&&&&&&&&&    "  ;
+  std::cout <<nodes_along_line_integration[1][0]<<" ";
+  std::cout <<nodes_along_line_integration[2][0]<<" ";std::cout << std::endl;
+  std::cout <<  "&&&&&& second node y,z &&&&&&&&&&    "  ;
+  std::cout <<nodes_along_line_integration[1][1]<<" ";
+  std::cout <<nodes_along_line_integration[2][1]<<" ";std::cout << std::endl;
+  std::cout <<  "&------------------------------------------------------------------------&    "  << std::endl;
+  std::cout <<  "&&&&&& radus 1 &&&&&&&&&&    "  ;
+  std::cout <<radius_centered_at_x_qp_of_iface_bdry_bdry[1][0]<<" ";
+  std::cout <<radius_centered_at_x_qp_of_iface_bdry_bdry[2][0]<<" ";
+  std::cout <<  "&&&&&& ratio z/y 1 &&&&&&&&&&    "  ;
+  std::cout <<radius_centered_at_x_qp_of_iface_bdry_bdry[2][0]/radius_centered_at_x_qp_of_iface_bdry_bdry[1][0]<<" ";std::cout << std::endl;
+  std::cout <<  "&&&&&& radus 2 &&&&&&&&&&    "  ;
+  std::cout <<radius_centered_at_x_qp_of_iface_bdry_bdry[1][1]<<" ";
+  std::cout <<radius_centered_at_x_qp_of_iface_bdry_bdry[2][1]<<" ";
+  std::cout <<  "&&&&&& ratio z/y 1 &&&&&&&&&&    "  ;
+  std::cout <<radius_centered_at_x_qp_of_iface_bdry_bdry[2][1]/radius_centered_at_x_qp_of_iface_bdry_bdry[1][1]<<" ";std::cout << std::endl;
+  std::cout <<  "&------------------------------------------------------------------------&    "  << std::endl;
+  std::cout <<  "&&&&&& theta_first_and_last_radius &&&&&&&&&&    "  ;
+  std::cout <<theta_first_and_last_radius[0]<<" ";
+  std::cout <<theta_first_and_last_radius[1]<<" ";std::cout << std::endl;
+  std::cout <<  "&------------------------------------------------------------------------&    "  << std::endl;
+  std::cout <<  "&&&&&& integral &&&&&&&&&&    "  ;
+  std::cout <<mixed_denominator_numerical<<std::endl;
+
+
+
+
+                            }
+               // integral - END -----
               }
               // compute unbounded integral - END -----
 
@@ -499,6 +592,16 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
             /// @todo ONLY DIFFERENCES: the mixed_denominator is numerical, and so also the corresponding Res and Jac. It could be done with a single function
 //--- Denominator, unbounded integral - END -------
             
+//  std::cout << std::endl;
+//   std::cout << std::endl;
+// //   std::cout <<  "&&&&&& QUADRATURE POINT X &&&&&&&&&&    "  ;
+//   std::cout <<x_qp_of_iface[1]<<" " ;
+//   std::cout <<x_qp_of_iface[2]<<" ";/*<<x_qp_of_iface[0]<<" ";*/
+//   std::cout <<mixed_denominator_numerical<<std::endl;
+//   std::cout <<x_qp_of_iface[1]<<" ";
+
+
+
 //--- Integral - BEGIN -------
               for (unsigned c = 0; c < n_components_ctrl; c++) {
                  integral +=  0.5 * C_ns * check_limits * operator_Hhalf  * beta  * sol_ctrl_qp_of_iface[c] * sol_ctrl_qp_of_iface[c] * weight_qp_of_iface * mixed_denominator_numerical /* * (1. / s_frac)*/;

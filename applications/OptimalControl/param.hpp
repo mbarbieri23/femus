@@ -133,8 +133,8 @@ namespace ctrl {
 
   #define UNBOUNDED   1
 
-//   #define ANALITICAL_SOLUTION 0
-  #define ANALITICAL_SOLUTION 1
+  #define ANALITICAL_SOLUTION 0 //NUMERICAL
+//   #define ANALITICAL_SOLUTION 1 //ANALITICAL
 
   #define USE_Cns     1
 
@@ -163,7 +163,7 @@ namespace ctrl {
 #define Quadrature_split_index  0
 
 //for semi-analytical integration in the unbounded domain
-#define N_DIV_FACE_OF_FACE_FOR_UNBOUNDED_INTEGRAL  10
+#define N_DIV_FACE_OF_FACE_FOR_UNBOUNDED_INTEGRAL  /*10*/ 2
 
 #define QRULE_I   0
 #define QRULE_J   1
