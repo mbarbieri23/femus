@@ -14,7 +14,7 @@
 
 #include "fractional_functions.hpp"
 
-#include "opt_systems_boundary_control_eqn_sobolev_fractional_analitical_coefficent_calculus.hpp"
+#include "opt_systems_boundary_control_eqn_sobolev_fractional_analytical_coefficent_calculus.hpp"
 
 
 #define TEST_JEL_SINGLE_FOR_LOOP  /*0*/iel
@@ -41,7 +41,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                       int & count,
 //
                       const unsigned unbounded,
-                      const unsigned int analitical_solution,
+                      const unsigned int analytical_solution,
                       const unsigned dim,
                       const unsigned dim_bdry,
 //////////
@@ -346,18 +346,18 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
              //*********************************************************************************
              //======================== ANALITICAL SOLUTION - BEGIN ========================
              //*********************************************************************************
-              if( analitical_solution == 1 /*&&nodes_along_line_integration[]*//*&& check_if_same_elem( TEST_JEL_SINGLE_FOR_LOOP , jel)*/ ){
+              if( analytical_solution == 1 /*&&nodes_along_line_integration[]*//*&& check_if_same_elem( TEST_JEL_SINGLE_FOR_LOOP , jel)*/ ){
 //               count++;
 
               //--------------------------------------------------------------------------------------------------------
-              //****************** preparation coefficent and extreme for analitical solution - BEGIN ******************
+              //****************** preparation coefficent and extreme for analytical solution - BEGIN ******************
               //--------------------------------------------------------------------------------------------------------
               //---------- coefficent declaration - BEGIN ----------
               double a, b, c, d, sp;
               //---------- coefficent declaration - END ----------
               sp = 2. * s_frac;
-//               coefficent_of_analitical_solution< LIST_OF_CTRL_FACES >(nodes_along_line_integration,
-              coefficent_of_analitical_solution(nodes_along_line_integration,
+//               coefficent_of_analytical_solution< LIST_OF_CTRL_FACES >(nodes_along_line_integration,
+              coefficent_of_analytical_solution(nodes_along_line_integration,
                                                 //------- i_face qd_point ----------
                                                 x_qp_of_iface,
                                                 //------- tangent vector -------
@@ -367,7 +367,7 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
               double abs_c = abs(- c);
               d = 1 / ( sp * pow( abs_c, sp) );
               //------------------------------------------------------------------------------------------------------
-              //****************** preparation coefficent and extreme for analitical solution - END ******************
+              //****************** preparation coefficent and extreme for analytical solution - END ******************
               //------------------------------------------------------------------------------------------------------
 
 
@@ -386,9 +386,12 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                                                            radius_centered_at_x_qp_of_iface_bdry_bdry[ global_dirs_for_atan[global_dir_first ] ][pt]);
                 }
 
+//this needed if you want calculate theta2 - theta1 : BEGIN
 //                 if(theta_first_and_last_radius[ theta_of_radius_second ] < theta_first_and_last_radius[ theta_of_radius_first ]) {
 //                     theta_first_and_last_radius[theta_of_radius_second ] += 2. * M_PI;
 //                 }
+//this needed if you want calculate theta2 - theta1 : END
+
               //--------- theta's calculus - END ---------
               //------------------------------------------------------------------------------------
               //************ theta's - END ************
@@ -406,9 +409,16 @@ template < class LIST_OF_CTRL_FACES, class DOMAIN_CONTAINING_CTRL_FACES >
                               && (nodes_along_line_integration[2][2]>x_qp_of_iface[2])
                               ){
 count++;
-              mixed_denominator_numerical += d * (
-              a * ( sin(theta_first_and_last_radius[ theta_of_radius_second ]) - sin(theta_first_and_last_radius[ theta_of_radius_first]) ) -
-              b * ( cos(theta_first_and_last_radius[ theta_of_radius_second ]) - cos(theta_first_and_last_radius[ theta_of_radius_first]) ) );
+//               mixed_denominator_numerical += d * (
+//               a * ( sin(theta_first_and_last_radius[ theta_of_radius_second ]) - sin(theta_first_and_last_radius[ theta_of_radius_first]) ) -
+//               b * ( cos(theta_first_and_last_radius[ theta_of_radius_second ]) - cos(theta_first_and_last_radius[ theta_of_radius_first]) ) );
+
+             mixed_denominator_numerical += d * sin_or_cos_integral(a,
+                                                                    b,
+                                                                    c,
+                                                                    theta_first_and_last_radius[ theta_of_radius_first],
+                                                                    theta_first_and_last_radius[ theta_of_radius_second]);
+
 
   std::cout <<  "&&&&&& ANALYTICAL &&&&&&&&&&    "  << std::endl;
   std::cout <<  "&------------------------------------------------------------------------&    "  << std::endl;
@@ -447,8 +457,9 @@ count++;
 
 
 
-            }
+            }//end if for output
               // integral - END -----
+
 //             }  //end face of face loop
               } //end if ANALITICAL_SOLUTION
               //*********************************************************************************
@@ -574,7 +585,7 @@ count++;
 
 
 
-                            }
+                            }//end if for output
                // integral - END -----
               }
               // compute unbounded integral - END -----
@@ -778,7 +789,7 @@ count++;
                         const unsigned int operator_L2,
                         const double rhs_one,
                         const unsigned int unbounded,
-                        const unsigned int analitical_solution,
+                        const unsigned int analytical_solution,
                         const std::string node_based_bdry_bdry_in,
                         //--- Quadrature --------
                         const unsigned qrule_i,
@@ -1630,7 +1641,7 @@ unsigned nDof_iel_vec = 0;
                               count,
 //
                               unbounded,
-                              analitical_solution,
+                              analytical_solution,
                               dim,
                               dim_bdry,
 //////////
@@ -1822,7 +1833,7 @@ unsigned nDof_iel_vec = 0;
                   count,
                   //
                               unbounded,
-                              analitical_solution,
+                              analytical_solution,
                               dim,
                               dim_bdry,
 //////////                             

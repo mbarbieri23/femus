@@ -163,7 +163,7 @@ namespace ctrl {
 #define Quadrature_split_index  0
 
 //for semi-analytical integration in the unbounded domain
-#define N_DIV_FACE_OF_FACE_FOR_UNBOUNDED_INTEGRAL  /*10*/ 2
+#define N_DIV_FACE_OF_FACE_FOR_UNBOUNDED_INTEGRAL  10
 
 #define QRULE_I   0
 #define QRULE_J   1

@@ -1,12 +1,166 @@
-#ifndef OPT_SYSTEMS_BOUNDARY_CONTROL_EQN_SOBOLEV_FRACTIONAL_ANALITICAL_COEFFICENT_CALCULUS_HPP_
-#define OPT_SYSTEMS_BOUNDARY_CONTROL_EQN_SOBOLEV_FRACTIONAL_ANALITICAL_COEFFICENT_CALCULUS_HPP_
+#ifndef OPT_SYSTEMS_BOUNDARY_CONTROL_EQN_SOBOLEV_FRACTIONAL_ANALYTICAL_COEFFICENT_CALCULUS_HPP_
+#define OPT_SYSTEMS_BOUNDARY_CONTROL_EQN_SOBOLEV_FRACTIONAL_ANALYTICAL_COEFFICENT_CALCULUS_HPP_
 
     // 1) togliere estremi 0.25 e 0.75
+
+// #include <math.h> // for M_PI
 
 
 namespace femus {
 
 namespace ctrl {
+
+
+//************************* give a vector return tur if the vector components are the same , false if not - BEGIN *************************
+       template < class component_type >
+       bool vector_components_are_equal (std::vector<component_type> my_vector){
+                    bool are_equalal = true;
+                    for(int d = 0; d < my_vector.size() - 1; d++){
+                       if( my_vector[d] != my_vector[d + 1] ) { are_equalal = false; break; }
+                    }
+                    return are_equalal;
+       }
+//************************* give a vector return tur if the vector components are the same , false if not - END *************************
+
+
+//*************************  parameter for analytical solution of mixed integral - BEGIN *************************
+      void coefficent_of_analytical_solution(const std::vector< std::vector< double > > nodes_on_element_boundary_face_line,
+                                             //------- i_face qd_point ----------
+                                             const std::vector< double> center_of_polar_coords,
+                                             //------- tangent vector -------
+                                             const std::vector< unsigned int> tangential_face_index_vector,
+                                             //------- output -------
+                                             double& a, double& b, double& c){
+
+                constexpr unsigned first_tang_dir = 0;
+                constexpr unsigned second_tang_dir = 1;
+
+                constexpr unsigned first_node_along_element_face_line = 0;
+
+
+            if( vector_components_are_equal<double>( nodes_on_element_boundary_face_line[ tangential_face_index_vector[ first_tang_dir ] ] ) ) {
+
+                unsigned int normal_tangential_direction_to_bndry_bndry_integration_line = tangential_face_index_vector[  first_tang_dir ];// normal is the components (respect the integration line) where points  are equal !!!!!!
+                unsigned int direction_of_bndry_bndry_integration_line = tangential_face_index_vector[  second_tang_dir ];
+
+                a = 1.;
+                b = 0.;
+                c = - ( nodes_on_element_boundary_face_line[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ]
+                        -center_of_polar_coords[ normal_tangential_direction_to_bndry_bndry_integration_line ]
+                       );
+
+            }
+            else if( vector_components_are_equal<double>( nodes_on_element_boundary_face_line[ tangential_face_index_vector[  second_tang_dir ] ] ) ) {
+
+                unsigned int normal_tangential_direction_to_bndry_bndry_integration_line = tangential_face_index_vector[  second_tang_dir ];
+                unsigned int direction_of_bndry_bndry_integration_line = tangential_face_index_vector[  first_tang_dir ];
+
+                a = 0.;
+                b = 1.;
+                c = - ( nodes_on_element_boundary_face_line[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ]
+                         -center_of_polar_coords[ normal_tangential_direction_to_bndry_bndry_integration_line ]
+                       );
+            }
+
+      }//end function : coefficent_of_analytical_solution
+//*************************  parameter for analytical solution of mixed integral - END *************************
+
+//*************************  absolute value of sin/cos for unbounded integral - BEGIN *************************
+double sin_or_cos_integral(double a,
+                           double b,
+                           double c,
+                           double theta1,
+                           double theta2){
+
+//switch BEGIN
+
+//-you can't use switch because you need a constant expression, but a and b are changin during the execution
+
+
+//     double gognometric_integral = 0.;
+
+//     switch(a,b){
+//
+//         // integral : abs(cos) -BEGIN
+//         case( a == 1. && b == 0 ):
+//
+//             switch(theta1,theta2){
+//
+//                 case(
+//                        (theta1>-pi/2)&&(theta2<pi/2)
+//                     ):
+//
+//                     return /*gognometric_integral =*/ a * (sin(theta2)-sin(theta1));
+//
+// //                     break;
+//
+//                 case(
+//                       ( (theta1>pi/2)&&(theta2<pi) ) || ( (theta1>-pi)&&(theta2<-pi/2) )
+//                     ):
+//
+//                     return /*gognometric_integral=*/ - a * ( sin(theta2)-sin(theta1) );
+//
+// //                     break;
+//
+//             }// end case (1,0)
+// //         break;
+//         // integral : abs(cos) -END
+//
+//         // integral : abs(sin) -BEGIN
+//         case( a == 1. && b == 0 ):
+//
+//             switch(theta1,theta2){
+//
+//                 case(
+//                        (theta1>0.)&&(theta2<pi)
+//                     ):
+//
+//                     return /*gognometric_integral =*/ -b * ( cos(theta2) - cos(theta1) );
+//
+// //                     break;
+//
+//                 case(
+//                       (theta1>-pi)&&(theta2<0.)
+//                 ):
+//
+//                     return /*gognometric_integral =*/ b * ( cos(theta2) - cos(theta1) );
+//
+// //                     break;
+//
+//             }// end case (0,1)
+// //         break;
+//         // integral : abs(sin) -END
+//
+//     }// end switch(a,b)
+//switch END
+
+        // integral : abs(cos) -BEGIN
+        if( a == 1. && b == 0. ){
+            if      ( -c > 0 ) { return   a * ( sin(theta2) - sin(theta1) ); }
+            else if ( -c < 0 ) { return  -a * ( sin(theta2) - sin(theta1) ); }
+        }
+        // integral : abs(cos) -END
+
+        // integral : abs(sin) -BEGIN
+        else if( a == 0. && b == 1. ){
+            if      ( -c > 0 ) { return -b * ( cos(theta2) - cos(theta1) ); }
+            else if ( -c < 0 ) { return  b * ( cos(theta2) - cos(theta1) ); }
+        }
+        // integral : abs(sin) -END
+
+}
+
+//*************************  absolute value of sin/cos for unbounded integral - END *************************
+
+
+
+
+
+
+
+
+
+
 
 ////////LIST_OF_CTRL_FACES stuff - BEGIN
 //************************* get_position_on_list_faces_clas - BEGIN *************************
@@ -64,22 +218,9 @@ namespace ctrl {
 
 
 //*****************************************************************************************************************************************
-//*****************************************************************************************************************************************
 //********************************************* PREVIOUS FUNCTION - BEGIN *****************************************************************
 //*****************************************************************************************************************************************
 //*****************************************************************************************************************************************
-
-//************************* give a vector return tur if the vector components are the same , false if not - BEGIN *************************
-       template < class component_type >
-       bool vector_components_are_equal (std::vector<component_type> my_vector){
-                    bool are_equalal = true;
-                    for(int d = 0; d < my_vector.size() - 1; d++){
-                       if( my_vector[d] != my_vector[d + 1] ) { are_equalal = false; break; }
-                    }
-                    return are_equalal;
-       }
-//************************* give a vector return tur if the vector components are the same , false if not - END *************************
-
 
 //************************* give a vector return if the vector has the component decreasing along specific direction - BEGIN *************************
 bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vector< std::vector< double > > vector_of_cords, unsigned int direction){
@@ -89,7 +230,6 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
 
 }
 //************************* give a vector return if the vector has the component decreasing along specific direction - END *************************
-
 
 //************************* integration_extreme_cords 3 x 3 - BEGIN *************************
      std::vector<std::vector<double>> integration_extreme_cords(unsigned int face_index,
@@ -108,60 +248,60 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
                                                                 //----------- orientation ------------
                                                                 bool are_nodes_coordinates_decreasing_along_integration_directin,
                                                                 //--------- matrix of extreeme of control region --------------
-                                                                std::vector<std::vector< double > > & cords_of_analitical_integer_extreme){
+                                                                std::vector<std::vector< double > > & cords_of_analytical_integer_extreme){
 
 
     constexpr unsigned first_node_along_element_face_line = 0;
 
     //----------------- filling extreme along normal tangential direction - BEGIN -----------------
-    for (int p = 0; p < cords_of_analitical_integer_extreme[normal_dir].size(); p++){
+    for (int p = 0; p < cords_of_analytical_integer_extreme[normal_dir].size(); p++){
 
         if(nodes_on_element_boundary_face_line[normal_tangential_direction_to_bndry_bndry_integration_line][first_node_along_element_face_line] > element_face_center_3d[normal_tangential_direction_to_bndry_bndry_integration_line] ){
 
             std::vector<double>::iterator result = std::max_element( face_index_extreme_3d_along_direction[normal_tangential_direction_to_bndry_bndry_integration_line].begin(),
                                                                      face_index_extreme_3d_along_direction[normal_tangential_direction_to_bndry_bndry_integration_line].end()   );
 
-            cords_of_analitical_integer_extreme[normal_tangential_direction_to_bndry_bndry_integration_line][p] = *result;
+            cords_of_analytical_integer_extreme[normal_tangential_direction_to_bndry_bndry_integration_line][p] = *result;
         }
         else{
 
             std::vector<double>::iterator result = std::min_element( face_index_extreme_3d_along_direction[normal_tangential_direction_to_bndry_bndry_integration_line].begin(),
                                                                      face_index_extreme_3d_along_direction[normal_tangential_direction_to_bndry_bndry_integration_line].end()    );
 
-            cords_of_analitical_integer_extreme[normal_tangential_direction_to_bndry_bndry_integration_line][p] = *result;
+            cords_of_analytical_integer_extreme[normal_tangential_direction_to_bndry_bndry_integration_line][p] = *result;
         }
 
     }
     //----------------- filling extreme along normal tangential direction - END -------------------
 
     //----------------- filling normal direction -----------------
-    cords_of_analitical_integer_extreme[normal_dir] = face_index_extreme_3d_along_direction[normal_dir];
+    cords_of_analytical_integer_extreme[normal_dir] = face_index_extreme_3d_along_direction[normal_dir];
     //------------------------------------------------------------
 
     //----------------- filling integration line direction -----------------
-    cords_of_analitical_integer_extreme[direction_of_bndry_bndry_integration_line] = face_index_extreme_3d_along_direction[direction_of_bndry_bndry_integration_line];
+    cords_of_analytical_integer_extreme[direction_of_bndry_bndry_integration_line] = face_index_extreme_3d_along_direction[direction_of_bndry_bndry_integration_line];
     //----------------------------------------------------------------------
 
     //----------------- reverse matrix - BEGIN -----------------
-    bool is_integration_extreme_matrix_decreasing = is_vector_oriented_with_cords_decreasing_along_specific_direction(cords_of_analitical_integer_extreme, direction_of_bndry_bndry_integration_line);
+    bool is_integration_extreme_matrix_decreasing = is_vector_oriented_with_cords_decreasing_along_specific_direction(cords_of_analytical_integer_extreme, direction_of_bndry_bndry_integration_line);
     bool is_reserve_vector_needed = ( are_nodes_coordinates_decreasing_along_integration_directin ^ is_integration_extreme_matrix_decreasing );
 
     if( is_reserve_vector_needed ){
-            for(unsigned dir = 0; dir <  cords_of_analitical_integer_extreme.size(); dir++) {
-             std::reverse( cords_of_analitical_integer_extreme[dir].begin(), cords_of_analitical_integer_extreme[dir].end() );
+            for(unsigned dir = 0; dir <  cords_of_analytical_integer_extreme.size(); dir++) {
+             std::reverse( cords_of_analytical_integer_extreme[dir].begin(), cords_of_analytical_integer_extreme[dir].end() );
             }
     }
     //----------------- reverse matrix - END -------------------
 
-    return cords_of_analitical_integer_extreme;
+    return cords_of_analytical_integer_extreme;
 
 }
 //************************* integration_extreme_cords 3 x 3 - END *************************
 
 
-//************************* calculus of parameter for analitical solution of mixed integral - BEGIN *************************
+//************************* calculus of parameter for analytical solution of mixed integral - BEGIN *************************
            template < class LIST_OF_CTRL_FACES >
-      void calculation_of_coefficent_of_analitical_solution(unsigned int face_index,
+      void calculation_of_coefficent_of_analytical_solution(unsigned int face_index,
                                                             //const unsigned int dim,
                                                             //const unsigned int dim_bdry,
                                                             //-----element face center
@@ -173,7 +313,7 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
                                                             //------- normal dir -------
                                                             unsigned int normal_dir,
                                                             //------- output -------
-                                                            std::vector< std::vector< double > >& analitical_integral_extreme_cords,
+                                                            std::vector< std::vector< double > >& analytical_integral_extreme_cords,
                                                             double& a, double& b, double& c){
 
                 constexpr unsigned first_tang_dir = 0;
@@ -198,7 +338,7 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
 
                 are_nodes_coordinates_decreasing_along_integration_directin = is_vector_oriented_with_cords_decreasing_along_specific_direction(nodes_on_element_boundary_face_line, direction_of_bndry_bndry_integration_line);
 
-                analitical_integral_extreme_cords =integration_extreme_cords(face_index,
+                analytical_integral_extreme_cords =integration_extreme_cords(face_index,
                                                                              //dim,
                                                                              //dim_bdry,
                                                                              //-----element face center
@@ -214,9 +354,9 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
                                                                              //----------- orientation ------------
                                                                              are_nodes_coordinates_decreasing_along_integration_directin,
                                                                              //--------- matrix of extreeme of control region --------------
-                                                                             analitical_integral_extreme_cords);
+                                                                             analytical_integral_extreme_cords);
 
-                c = - analitical_integral_extreme_cords[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ] ;
+                c = - analytical_integral_extreme_cords[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ] ;
 
             }
             else if( vector_components_are_equal<double>( nodes_on_element_boundary_face_line[ tangential_face_index_vector[  second_tang_dir ] ] ) ) {
@@ -229,7 +369,7 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
 
                 are_nodes_coordinates_decreasing_along_integration_directin = is_vector_oriented_with_cords_decreasing_along_specific_direction(nodes_on_element_boundary_face_line, direction_of_bndry_bndry_integration_line);
 
-                analitical_integral_extreme_cords =integration_extreme_cords(face_index,
+                analytical_integral_extreme_cords =integration_extreme_cords(face_index,
                                                                              //dim,
                                                                              //dim_bdry,
                                                                              //-----element face center
@@ -245,62 +385,17 @@ bool is_vector_oriented_with_cords_decreasing_along_specific_direction(std::vect
                                                                              //----------- orientation ------------
                                                                              are_nodes_coordinates_decreasing_along_integration_directin,
                                                                              //--------- matrix of extreeme of control region --------------
-                                                                             analitical_integral_extreme_cords);
+                                                                             analytical_integral_extreme_cords);
 
-                c = - analitical_integral_extreme_cords[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ] ;
+                c = - analytical_integral_extreme_cords[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ] ;
             }
       }
-//************************* calculus of parameter for analitical solution of mixed integral - END *************************
+//************************* calculus of parameter for analytical solution of mixed integral - END *************************
 
 //*****************************************************************************************************************************************
 //*****************************************************************************************************************************************
 //********************************************* PREVIOUS FUNCTION - END *****************************************************************
 //*****************************************************************************************************************************************
-//*****************************************************************************************************************************************
-
-
-//*************************  parameter for analitical solution of mixed integral - BEGIN *************************
-      void coefficent_of_analitical_solution(const std::vector< std::vector< double > > nodes_on_element_boundary_face_line,
-                                             //------- i_face qd_point ----------
-                                             const std::vector< double> center_of_polar_coords,
-                                             //------- tangent vector -------
-                                             const std::vector< unsigned int> tangential_face_index_vector,
-                                             //------- output -------
-                                             double& a, double& b, double& c){
-
-                constexpr unsigned first_tang_dir = 0;
-                constexpr unsigned second_tang_dir = 1;
-
-                constexpr unsigned first_node_along_element_face_line = 0;
-
-
-            if( vector_components_are_equal<double>( nodes_on_element_boundary_face_line[ tangential_face_index_vector[ first_tang_dir ] ] ) ) {
-
-                unsigned int normal_tangential_direction_to_bndry_bndry_integration_line = tangential_face_index_vector[  first_tang_dir ];// normal is the components (respect the integration line) where points  are equal !!!!!!
-                unsigned int direction_of_bndry_bndry_integration_line = tangential_face_index_vector[  second_tang_dir ];
-
-                a = 1.;
-                b = 0.;
-                c = - ( nodes_on_element_boundary_face_line[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ]
-                        -center_of_polar_coords[ normal_tangential_direction_to_bndry_bndry_integration_line ]
-                       );
-
-            }
-            else if( vector_components_are_equal<double>( nodes_on_element_boundary_face_line[ tangential_face_index_vector[  second_tang_dir ] ] ) ) {
-
-                unsigned int normal_tangential_direction_to_bndry_bndry_integration_line = tangential_face_index_vector[  second_tang_dir ];
-                unsigned int direction_of_bndry_bndry_integration_line = tangential_face_index_vector[  first_tang_dir ];
-
-                a = 0.;
-                b = 1.;
-                c = - ( nodes_on_element_boundary_face_line[ normal_tangential_direction_to_bndry_bndry_integration_line ][ first_node_along_element_face_line ]
-                         -center_of_polar_coords[ normal_tangential_direction_to_bndry_bndry_integration_line ]
-                       );
-            }
-      }
-//*************************  parameter for analitical solution of mixed integral - END *************************
-
-
 
 
 
