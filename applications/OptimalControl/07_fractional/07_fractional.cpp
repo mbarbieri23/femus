@@ -54,7 +54,7 @@ using namespace femus;
 
 #include "../fractional_functions.hpp"
 
-// #include "../opt_systems_boundary_control_eqn_sobolev_fractional_analytical_coefficent_calculus.hpp"
+#include "../opt_systems_boundary_control_eqn_sobolev_fractional_analytical_coefficent_calculus.hpp"
 
 
 //***** Quadrature-related ****************** 
@@ -63,6 +63,15 @@ using namespace femus;
 #define N_DIV_FACE_OF_FACE_FOR_UNBOUNDED_INTEGRAL  10
 
 //**************************************
+
+
+//**********Numerical solution**********
+#define ANALITICAL_SOLUTION  0   //NUMERICAL
+// #define ANALITICAL_SOLUTION  1   //ANALITICAL
+//**************************************
+
+
+
 
 
 
@@ -1031,70 +1040,78 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
              //*********************************************************************************
              //======================== ANALITICAL SOLUTION - BEGIN ========================
              //*********************************************************************************
-//               if( 0 == 1  ){
-//
-//               //--------------------------------------------------------------------------------------------------------
-//               //****************** preparation coefficent and extreme for analytical solution - BEGIN ******************
-//               //--------------------------------------------------------------------------------------------------------
-// //               std::vector<unsigned int> global_dirs_for_atan= {0,1};
-//               std::vector<unsigned int> global_dirs_for_atan(2,0);
-//               global_dirs_for_atan[0]=0;
-//               global_dirs_for_atan[1]=1;
-//               //---------- coefficent declaration - BEGIN ----------
-//               double a, b, c, d, sp;
-//               //---------- coefficent declaration - END ----------
-//               sp = 2. * s_frac;
-//               coefficent_of_analytical_solution(nodes_along_line_integration,
-//                                                 //------- i_face qd_point ----------
-//                                                 xg1,
-//                                                 //------- tangent vector -------
-//                                                 global_dirs_for_atan,
-//                                                 //------- output -------
-//                                                 a, b, c);
-//               double abs_c = abs(- c);
-//               d = 1 / ( sp * pow( abs_c, sp) );
-//               //------------------------------------------------------------------------------------------------------
-//               //****************** preparation coefficent and extreme for analytical solution - END ******************
-//               //------------------------------------------------------------------------------------------------------
-//
-//               //------------------------------------------------------------------------------------
-//               //************ theta's - BEGIN ************
-//               //------------------------------------------------------------------------------------
-//               //--------- theta declaration - BEGIN ---------
-//               std::vector< double > theta_first_and_last_radius(2);
-//               constexpr unsigned theta_of_radius_first = 0;
-//               constexpr unsigned theta_of_radius_second = 1;
-//               //--------- theta declaration - END ---------
-//
-//               //--------- theta's calculus - BEGIN ---------
-//                 for(unsigned pt = 0; pt < theta_first_and_last_radius.size(); pt++) {
-//                    theta_first_and_last_radius[pt] = atan2(faceCoordinates[ global_dirs_for_atan[global_dir_second] ][pt],
-//                                                            faceCoordinates[ global_dirs_for_atan[global_dir_first ] ][pt]);
-//                 }
-//
-// //this needed if you want calculate theta2 - theta1 : BEGIN
-// //                 if(theta_first_and_last_radius[ theta_of_radius_second ] < theta_first_and_last_radius[ theta_of_radius_first ]) {
-// //                     theta_first_and_last_radius[theta_of_radius_second ] += 2. * M_PI;
-// //                 }
-// //this needed if you want calculate theta2 - theta1 : END
-//
-//               //--------- theta's calculus - END ---------
-//               //------------------------------------------------------------------------------------
-//               //************ theta's - END ************
-//               //------------------------------------------------------------------------------------
-//
-//               // integral - BEGIN -----
+              if( ANALITICAL_SOLUTION  ){
+
+              //--------------------------------------------------------------------------------------------------------
+              //****************** preparation coefficent and extreme for analytical solution - BEGIN ******************
+              //--------------------------------------------------------------------------------------------------------
+//               std::vector<unsigned int> global_dirs_for_atan= {0,1};
+              std::vector<unsigned int> global_dirs_for_atan(2,0);
+             constexpr unsigned global_dir_first = 0;
+             constexpr unsigned global_dir_second = 1;
+              global_dirs_for_atan[global_dir_first]=0;
+              global_dirs_for_atan[global_dir_second]=1;
+              //---------- coefficent declaration - BEGIN ----------
+              double a, b, c, d, sp;
+              //---------- coefficent declaration - END ----------
+              sp = 2. * s_frac;
+              ctrl::coefficent_of_analytical_solution(nodes_along_line_integration,
+                                                //------- i_face qd_point ----------
+                                                xg1,
+                                                //------- tangent vector -------
+                                                global_dirs_for_atan,
+                                                //------- output -------
+                                                a, b, c);
+              double abs_c = abs(- c);
+              d = 1 / ( sp * pow( abs_c, sp) );
+              //------------------------------------------------------------------------------------------------------
+              //****************** preparation coefficent and extreme for analytical solution - END ******************
+              //------------------------------------------------------------------------------------------------------
+
+              //------------------------------------------------------------------------------------
+              //************ theta's - BEGIN ************
+              //------------------------------------------------------------------------------------
+              //--------- theta declaration - BEGIN ---------
+              std::vector< double > theta_first_and_last_radius(2);
+              constexpr unsigned theta_of_radius_first = 0;
+              constexpr unsigned theta_of_radius_second = 1;
+              //--------- theta declaration - END ---------
+
+              //--------- theta's calculus - BEGIN ---------
+                for(unsigned pt = 0; pt < theta_first_and_last_radius.size(); pt++) {
+                   theta_first_and_last_radius[pt] = atan2(faceCoordinates[ global_dirs_for_atan[global_dir_second] ][pt],
+                                                           faceCoordinates[ global_dirs_for_atan[global_dir_first ] ][pt]);
+                }
+
+              //--------- theta's calculus - END ---------
+              //------------------------------------------------------------------------------------
+              //************ theta's - END ************
+              //------------------------------------------------------------------------------------
+
+              // integral - BEGIN -----
+
+              mixed_term1 += d * ctrl::sin_or_cos_integral(a,
+                                                           b,
+                                                           c,
+                                                           theta_first_and_last_radius[ theta_of_radius_first],
+                                                           theta_first_and_last_radius[ theta_of_radius_second]);
+
 //               mixed_term1 += d * (
 //               a * ( sin(theta_first_and_last_radius[ theta_of_radius_second ]) - sin(theta_first_and_last_radius[ theta_of_radius_first]) ) -
 //               b * ( cos(theta_first_and_last_radius[ theta_of_radius_second ]) - cos(theta_first_and_last_radius[ theta_of_radius_first]) ) );
-//               // integral - END -----
-//
-//               } //end if ANALITICAL_SOLUTION
+              // integral - END -----
+
+              } //end if ANALITICAL_SOLUTION
 
               //*********************************************************************************
               //======================== ANALITICAL SOLUTION - END ========================
               //*********************************************************************************
 
+
+              //*********************************************************************************
+              //======================== NUMERICAL SOLUTION - BEGIN ========================
+              //*********************************************************************************
+               else{
 
               //refinment -BEGIN
               const unsigned div = N_DIV_FACE_OF_FACE_FOR_UNBOUNDED_INTEGRAL;
@@ -1132,6 +1149,14 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
                 mixed_term1 += 2. * pow(dist, -  2. * s_frac) * (1. / (2. * s_frac)) * delta_teta;
               }
             }
+            }//end else
+              //*********************************************************************************
+              //======================== NUMERICAL SOLUTION - END ========================
+              //*********************************************************************************
+
+
+
+
 
             for(unsigned i = 0; i < nDof1; i++) {
               for(unsigned j = 0; j < nDof1; j++) {
