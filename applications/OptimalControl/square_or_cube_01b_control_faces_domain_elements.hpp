@@ -27,7 +27,6 @@ namespace  square_or_cube {
 //*********************** Find volume elements that contain a Control domain element *********************************
 template < class LIST_OF_CTRL_FACES >
 class Domain_elements_containing_Gamma_control  {
-
 };
 
 //*********************** Pure boundary - BEGIN *********************************
@@ -53,7 +52,6 @@ class pure_boundary : public Domain_elements_containing_Gamma_control<LIST_OF_CT
      
      const bool does_iel_contain_Gamma_c = (bool) (*sol->_Sol[sol_for_cont_reg_index])(sol_for_cont_reg_dof);
 
-//      return true;
         return (does_iel_contain_Gamma_c == true);
         
   }

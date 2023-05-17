@@ -574,6 +574,7 @@ const int state_pos_begin   =  vector_offsets[pos_index_state];
                     OP_L2,
                     _rhs_one,
                     UNBOUNDED,
+                    ANALITICAL_SOLUTION,
                     _node_based_bdry_bdry,
                     //-----------
                     qrule_i,

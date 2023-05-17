@@ -54,6 +54,7 @@ using namespace femus;
 
 #include "../fractional_functions.hpp"
 
+#include "../opt_systems_boundary_control_eqn_sobolev_fractional_analytical_coefficent_calculus.hpp"
 
 
 //***** Quadrature-related ****************** 
@@ -62,6 +63,15 @@ using namespace femus;
 #define N_DIV_FACE_OF_FACE_FOR_UNBOUNDED_INTEGRAL  10
 
 //**************************************
+
+
+//**********Numerical solution**********
+#define ANALITICAL_SOLUTION  0   //NUMERICAL
+// #define ANALITICAL_SOLUTION  1   //ANALITICAL
+//**************************************
+
+
+
 
 
 
@@ -460,7 +470,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
       MPI_Bcast(&l2GMap2[0], nDof2, MPI_UNSIGNED, kproc, MPI_COMM_WORLD);
       // ******************************************************************
 
-      // local storage of coordinates  #######################################
+      // local storage of coordinates BEGIN  #######################################
       if(iproc == kproc) {
         for(unsigned j = 0; j < nDofx2; j++) {
           unsigned xDof  = msh->GetSolutionDof(j, jel, xType);  // global to global mapping between coordinates node and coordinate dof
@@ -477,7 +487,10 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
         MPI_Bcast(& x2[k][0], nDofx2, MPI_DOUBLE, kproc, MPI_COMM_WORLD);
       }
       MPI_Bcast(& solu2[0], nDof2, MPI_DOUBLE, kproc, MPI_COMM_WORLD);
-      // ######################################################################
+      //  local storage of coordinates END ######################################################################
+
+
+
 
       // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
       if(iproc == kproc) {
@@ -499,7 +512,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
       vector < vector <double> > phi2(jgNumber);  // local test function
       std::vector< double > solY(jgNumber, 0.);
 
-// ---- jg stored computations ---- 
+// ---- jg stored computations BEGIN ----
 // you store all that happens at the jg points so that it is computed only once      
       for(unsigned jg = 0; jg < jgNumber; jg++) {
 
@@ -522,7 +535,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
           }
         }
       }
-// ---- jg stored computations ----    
+// ---- jg stored computations END ----
 
 
 
@@ -534,6 +547,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
       if(iproc == kproc) {
         for(unsigned jface = 0; jface < msh->GetElementFaceNumber(jel); jface++) {
           int faceIndex = el->GetBoundaryIndex(jel, jface);
+
 //           faceDofs[jface] = msh->GetElementFaceDofNumber(jel, jface, solType);
 //           inode[jface].resize(faceDofs[jface]);
 // //       inode[jface].assign(faceDofs[jface], 0);
@@ -541,6 +555,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
 //             inode[jface][i] = msh->GetLocalFaceVertexIndex(jel, jface, i);    // face-to-element local node mapping.
 //           }
 //           MPI_Bcast(& inode[jface][0], faceDofs[jface], MPI_UNSIGNED, kproc, MPI_COMM_WORLD);
+
 
           // look for boundary faces
           if(faceIndex >= 1) {
@@ -712,7 +727,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
             }
 //============  Laplacian assembly - END ==================
 
-//============  Mixed integral - Analytical ((Rn-Omega) x Omega) assembly (based on the analytic result of integrals) ==================
+//============  Mixed integral - Analytical ((Rn-Omega) x Omega) assembly (based on the analytic result of integrals) BEGIN ==================
 //             if(dim == 1 && UNBOUNDED == 1) {
 //               double ex_1 = EX_1;
 //               double ex_2 = EX_2;
@@ -772,7 +787,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
 //                 Res_local[ i ] += (C_ns / 2.) * check_limits * OP_Hhalf * weight1 * phi1[i] * solX * mixed_term;
 //               }
 //             }
-//============  Mixed integral - Analytical ((Rn-Omega) x Omega) assembly (based on the analytic result of integrals) ==================
+//============  Mixed integral - Analytical ((Rn-Omega) x Omega) assembly (based on the analytic result of integrals) END ==================
 
 //============ Adaptive quadrature for iel == jel - BEGIN ==================
             if(OP_Hhalf != 0) {
@@ -848,7 +863,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
 // ********* UNBOUNDED PART - BEGIN ***************
                 if(ig == 0) { ///@todo is there a way to put this outside of the ig loop?
               if(UNBOUNDED == 1) {
-//============ Mixed integral 1D - Analytical ==================
+//============ Mixed integral 1D - Analytical BEGIN ==================
                 if(dim == 1) {
                   double ex_1 = EX_1;
                   double ex_2 = EX_2;
@@ -867,8 +882,8 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
                                  Res_local[ i ] += - (C_ns / 2.) * check_limits * OP_Hhalf * weight3 * phi3[i] * solY3 * mixed_term;
                   }
                 }
-//============ Mixed integral 1D - Analytical ==================
-//============ Mixed Integral 2D - Numerical ==================
+//============ Mixed integral 1D - Analytical END ==================
+//============ Mixed Integral 2D - Numerical BEGIN ==================
                 else if (dim == 2) {
                   double mixed_term1 = 0;
 //     for(int kel = msh->_elementOffset[iproc]; kel < msh->_elementOffset[iproc + 1]; kel++) {
@@ -931,7 +946,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
                                  Res_local_mixed_num[ i ] += - (C_ns / 2.) * check_limits * OP_Hhalf * weight3 * phi3[i] * solX * mixed_term1;
                   }
                 }
-//============ Mixed Integral 2D - Numerical ==================
+//============ Mixed Integral 2D - Numerical END ==================
              } //end unbounded
             } //end ig == 0
 // ********* UNBOUNDED PART - END ***************
@@ -951,7 +966,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
             
 // ********* UNBOUNDED PART - BEGIN ***************
           if(UNBOUNDED == 1 /*&& iel == jel*/) {
-    //============  Mixed integral 1D - Analytical  ==================
+    //============  Mixed integral 1D - Analytical BEGIN ==================
             if(dim == 1 && iel == jel) {
               double ex_1 = EX_1;
               double ex_2 = EX_2;
@@ -970,9 +985,9 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
                              Res_local[ i ] += - (C_ns / 2.) * check_limits * (1. / s_frac) * OP_Hhalf * weight1 * phi1[i] * solX * mixed_term;
               }
             }
-    //============  Mixed integral 1D - Analytical ==================        
+    //============  Mixed integral 1D - Analytical END ==================
     
-    //============ Mixed Integral 2D - Numerical ==================      
+    //============ Mixed Integral 2D - Numerical BEGIN ==================
             else if( dim == 2 ) {
 
             double mixed_term1 = 0;
@@ -985,17 +1000,120 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
 
               unsigned faceDofs = el->GetNFACENODES(ielGeom2, jface, solType);
 
+
+              //-----------------------------------------------------------------
+              //****************** nodes along integration line  - BEGIN  **************************
+              //****************** & radius centered at x qp              ******************
+              //-----------------------------------------------------------------
+
+              //------------ nodes_along_line_integration, declaration - BEGIN ------------
+              vector  < vector  <  double> > nodes_along_line_integration(dim);    // A matrix holding the face coordinates rowwise.
+              for(int k = 0; k < dim; k++) {
+                nodes_along_line_integration[k].resize(faceDofs);
+              }
+              //------------ nodes_along_line_integration, declaration - END ------------
+
+              //------------ radius_centered_at_x_qp_of_iface_bdry_bdry resize 3 X 3 - BEGIN ------------
               vector  < vector  <  double> > faceCoordinates(dim);    // A matrix holding the face coordinates rowwise.
               for(int k = 0; k < dim; k++) {
                 faceCoordinates[k].resize(faceDofs);
               }
+              //------------ radius_centered_at_x_qp_of_iface_bdry_bdry resize 3 X 3 - END ------------
+
+              //------------ radius_centered_at_x_qp_of_iface_bdry_bdry computation - BEGIN ------------
               for(unsigned i = 0; i < faceDofs; i++) {
                 unsigned inode = el->GetIG(ielGeom2, jface, i);  // face-to-element local node mapping.
                 for(unsigned k = 0; k < dim; k++) {
+                  nodes_along_line_integration[k][i] = x2[k][inode];
                   faceCoordinates[k][i] =  x2[k][inode] - xg1[k];  // We extract the local coordinates on the face from local coordinates on the element.
                 }
               }
-              
+              //------------ radius_centered_at_x_qp_of_iface_bdry_bdry computation - END ------------
+
+
+              //-----------------------------------------------------------------
+              //****************** nodes along integration line           ******************
+              //****************** & radius centered at x qp     - END    ******************
+              //-----------------------------------------------------------------
+
+
+             //*********************************************************************************
+             //======================== ANALITICAL SOLUTION - BEGIN ========================
+             //*********************************************************************************
+              if( ANALITICAL_SOLUTION  ){
+
+              //--------------------------------------------------------------------------------------------------------
+              //****************** preparation coefficent and extreme for analytical solution - BEGIN ******************
+              //--------------------------------------------------------------------------------------------------------
+//               std::vector<unsigned int> global_dirs_for_atan= {0,1};
+              std::vector<unsigned int> global_dirs_for_atan(2,0);
+             constexpr unsigned global_dir_first = 0;
+             constexpr unsigned global_dir_second = 1;
+              global_dirs_for_atan[global_dir_first]=0;
+              global_dirs_for_atan[global_dir_second]=1;
+              //---------- coefficent declaration - BEGIN ----------
+              double a, b, c, d, sp;
+              //---------- coefficent declaration - END ----------
+              sp = 2. * s_frac;
+              ctrl::coefficent_of_analytical_solution(nodes_along_line_integration,
+                                                //------- i_face qd_point ----------
+                                                xg1,
+                                                //------- tangent vector -------
+                                                global_dirs_for_atan,
+                                                //------- output -------
+                                                a, b, c);
+              double abs_c = abs(- c);
+              d = 1 / ( sp * pow( abs_c, sp) );
+              //------------------------------------------------------------------------------------------------------
+              //****************** preparation coefficent and extreme for analytical solution - END ******************
+              //------------------------------------------------------------------------------------------------------
+
+              //------------------------------------------------------------------------------------
+              //************ theta's - BEGIN ************
+              //------------------------------------------------------------------------------------
+              //--------- theta declaration - BEGIN ---------
+              std::vector< double > theta_first_and_last_radius(2);
+              constexpr unsigned theta_of_radius_first = 0;
+              constexpr unsigned theta_of_radius_second = 1;
+              //--------- theta declaration - END ---------
+
+              //--------- theta's calculus - BEGIN ---------
+                for(unsigned pt = 0; pt < theta_first_and_last_radius.size(); pt++) {
+                   theta_first_and_last_radius[pt] = atan2(faceCoordinates[ global_dirs_for_atan[global_dir_second] ][pt],
+                                                           faceCoordinates[ global_dirs_for_atan[global_dir_first ] ][pt]);
+                }
+
+              //--------- theta's calculus - END ---------
+              //------------------------------------------------------------------------------------
+              //************ theta's - END ************
+              //------------------------------------------------------------------------------------
+
+              // integral - BEGIN -----
+
+              mixed_term1 += d * ctrl::sin_or_cos_integral(a,
+                                                           b,
+                                                           c,
+                                                           theta_first_and_last_radius[ theta_of_radius_first],
+                                                           theta_first_and_last_radius[ theta_of_radius_second]);
+
+//               mixed_term1 += d * (
+//               a * ( sin(theta_first_and_last_radius[ theta_of_radius_second ]) - sin(theta_first_and_last_radius[ theta_of_radius_first]) ) -
+//               b * ( cos(theta_first_and_last_radius[ theta_of_radius_second ]) - cos(theta_first_and_last_radius[ theta_of_radius_first]) ) );
+              // integral - END -----
+
+              } //end if ANALITICAL_SOLUTION
+
+              //*********************************************************************************
+              //======================== ANALITICAL SOLUTION - END ========================
+              //*********************************************************************************
+
+
+              //*********************************************************************************
+              //======================== NUMERICAL SOLUTION - BEGIN ========================
+              //*********************************************************************************
+               else{
+
+              //refinment -BEGIN
               const unsigned div = N_DIV_FACE_OF_FACE_FOR_UNBOUNDED_INTEGRAL;
               vector  < vector  <  double> > interpCoordinates(dim);
               for(int k = 0; k < dim; k++) {
@@ -1006,6 +1124,9 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
                   interpCoordinates[k][n] = faceCoordinates[k][0] + n * (faceCoordinates[k][1] - faceCoordinates[k][0]) /  div ;
                 }
               }
+              //refinment -END
+
+              //theta-BEGIN
               for(unsigned n = 0; n < div; n++) {
                 double teta2 = atan2(interpCoordinates[1][n + 1], interpCoordinates[0][n + 1]);
                 double teta1 = atan2(interpCoordinates[1][n], interpCoordinates[0][n]);
@@ -1013,6 +1134,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
                 if(teta2 < teta1) teta2 += 2. * M_PI;
 
                 double delta_teta = teta2 - teta1;
+                //theta-END
 
                 vector <double> mid_point;
                 mid_point.resize(dim);
@@ -1027,6 +1149,14 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
                 mixed_term1 += 2. * pow(dist, -  2. * s_frac) * (1. / (2. * s_frac)) * delta_teta;
               }
             }
+            }//end else
+              //*********************************************************************************
+              //======================== NUMERICAL SOLUTION - END ========================
+              //*********************************************************************************
+
+
+
+
 
             for(unsigned i = 0; i < nDof1; i++) {
               for(unsigned j = 0; j < nDof1; j++) {
@@ -1036,7 +1166,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
               Res_local_mixed_num[ i ] += - (C_ns / 2.) * check_limits * OP_Hhalf * weight1 * phi1[i] * solX * mixed_term1;
             }
            }
-//============ Mixed Integral - Numerical ==================
+//============ Mixed Integral - Numerical END ==================
          }
 // ********* UNBOUNDED PART - END ***************
 
@@ -1081,6 +1211,7 @@ void AssembleFracProblem(MultiLevelProblem& ml_prob)
 //          assemble_jacobian<double,double>::print_element_residual(iel, Res, Sol_n_el_dofs_Mat_vol, 10, 5);
 //          assemble_jacobian<double,double>::print_element_jacobian(iel, KK_local_mixed_num, Sol_n_el_dofs_Mat_vol2, 10, 10);
 
+  // ***************** BEGIN ASSEMBLY *******************
         if(iel == jel) {
           KK->add_matrix_blocked(KK_local, l2GMap1, l2GMap1);
           RES->add_vector_blocked(Res_local, l2GMap1);

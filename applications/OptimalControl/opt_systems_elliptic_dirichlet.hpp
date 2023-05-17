@@ -426,6 +426,7 @@ public:
                     OP_L2,
                     _rhs_one,
                     UNBOUNDED,
+                    ANALITICAL_SOLUTION,
                     _node_based_bdry_bdry,
                     //-----------
                     qrule_i,
